@@ -1,0 +1,291 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  useWindowDimensions, ScrollView, Alert, Image,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveSession } from '@/hooks/useActiveSession';
+import { useVotingSocket } from '@/hooks/useVotingSocket';
+import { useTheme } from '@/contexts/ThemeContext';
+import { apiFetch, API_URL } from '@/lib/api';
+import { Avatar } from '@/components/Avatar';
+
+const TYPE_LABEL: Record<string, string> = {
+  ordinaria: 'Ordinária',
+  extraordinaria: 'Extraordinária',
+  solene: 'Solene',
+  especial: 'Especial',
+};
+
+interface Chamber {
+  id: string; name: string; city: string; logoUrl: string | null;
+  bienioInicio: number | null; bienioFim: number | null; anoBienio: number | null;
+}
+
+const API_BASE = API_URL.replace('/api', '');
+
+function sessionTitle(number: number, type: string, ch: Chamber | null): string {
+  const tipo = TYPE_LABEL[type] ?? type;
+  const base = `${number}ª Sessão ${tipo}`;
+  if (!ch?.bienioInicio || !ch?.bienioFim || !ch?.anoBienio) return base;
+  const ord = ch.anoBienio === 1 ? '1º' : '2º';
+  return `${base} do ${ord} Ano do Biênio ${ch.bienioInicio}–${ch.bienioFim}`;
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  presidente: 'Presidente', vereador: 'Vereador(a)',
+  secretaria: 'Secretaria', superadmin: 'Super Admin',
+};
+
+interface NavCard {
+  route: string; emoji: string; title: string; desc: string;
+  color: string; liveKey?: 'voting';
+}
+
+const COLS = 2;
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const { colors: C, isDark } = useTheme();
+  const { session } = useActiveSession();
+  const { votingOpen, connected } = useVotingSocket(session?.id ?? null);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const [chamber, setChamber] = useState<Chamber | null>(null);
+
+  const CARDS = useMemo<NavCard[]>(() => [
+    { route: 'votacao',    emoji: '🗳️', title: 'Votação',               desc: 'Acompanhe e vote nas matérias',  color: C.primary,  liveKey: 'voting' },
+    { route: 'expediente', emoji: '🎤', title: 'Expediente',            desc: 'Inscrição e uso da tribuna',     color: '#8B5CF6' },
+    { route: 'pauta',      emoji: '📋', title: 'Ordem do Dia',          desc: 'Matérias da sessão',             color: '#F59E0B' },
+    { route: 'presenca',   emoji: '✅', title: 'Presença',              desc: 'Confirme sua presença',          color: C.success },
+    { route: 'regimento',  emoji: '📜', title: 'Regimento Interno',     desc: 'Consulte o regimento da câmara', color: '#EC4899' },
+    { route: 'perfil',     emoji: '👤', title: 'Perfil do Parlamentar', desc: 'Seus dados e senha',             color: '#6366F1' },
+  ], [C]);
+
+  /* Divide CARDS em linhas de COLS */
+  const ROWS = useMemo(() => {
+    const r: NavCard[][] = [];
+    for (let i = 0; i < CARDS.length; i += COLS) r.push(CARDS.slice(i, i + COLS));
+    return r;
+  }, [CARDS]);
+
+  const s = useMemo(() => StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.bg },
+    landscapeContainer: { flex: 1, flexDirection: 'row' },
+    landscapeLeft: {
+      width: 320, borderRightWidth: 1, borderRightColor: C.border,
+      padding: 28, justifyContent: 'center', backgroundColor: C.surface,
+    },
+    userCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
+    userCardLandscape: { alignItems: 'stretch', gap: 14 },
+    userInfo: { flex: 1, gap: 6 },
+    userName: { color: C.text, fontSize: 24, fontWeight: '800', letterSpacing: -0.5, lineHeight: 30 },
+    userParty: { color: C.primary, fontSize: 17, fontWeight: '600' },
+    roleBadge: {
+      backgroundColor: C.primary + '20', alignSelf: 'flex-start',
+      borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6,
+      borderWidth: 1, borderColor: C.primary + '40',
+    },
+    roleText: { color: C.primary, fontSize: 15, fontWeight: '700' },
+    sessionBlock: {
+      backgroundColor: C.card, borderRadius: 14,
+      borderWidth: 1, borderColor: C.success + '30', padding: 12, gap: 8,
+    },
+    chamberRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    chamberLogo: {
+      width: 40, height: 40, borderRadius: 20,
+      backgroundColor: C.success + '18', borderWidth: 1, borderColor: C.success + '50',
+      alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    },
+    chamberLogoImg: { width: 40, height: 40, borderRadius: 20, flexShrink: 0 },
+    chamberLogoStar: { fontSize: 20, color: C.success },
+    chamberName: { color: C.text, fontSize: 15, fontWeight: '700', flex: 1, lineHeight: 20, textTransform: 'uppercase' },
+    sessionFullTitle: { color: C.success, fontSize: 15, fontWeight: '600', lineHeight: 21, textTransform: 'uppercase' },
+    sessionStatus: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+    },
+    sessionDot: { width: 9, height: 9, borderRadius: 5 },
+    sessionStatusText: { fontSize: 16, fontWeight: '600' },
+    connBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+    },
+    connDot: { width: 9, height: 9, borderRadius: 5 },
+    connText: { fontSize: 16, fontWeight: '600' },
+    divider: { height: 1, backgroundColor: C.border },
+    leaveSessionBtn: {
+      borderRadius: 14, paddingVertical: 14,
+      backgroundColor: 'rgba(239,68,68,0.1)',
+      borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
+      alignItems: 'center',
+    },
+    leaveSessionText: { color: C.danger, fontSize: 16, fontWeight: '700' },
+    /* Cards */
+    card: {
+      flex: 1, backgroundColor: C.card, borderRadius: 20,
+      borderWidth: 1, overflow: 'hidden', position: 'relative', flexDirection: 'column',
+    },
+    cardIconWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
+    cardEmoji: { fontSize: 48 },
+    cardBody: {
+      paddingHorizontal: 14, paddingBottom: 18, paddingTop: 10,
+      gap: 4, alignItems: 'center',
+    },
+    cardTitle: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
+    cardDesc: { color: C.textMuted, fontSize: 16, lineHeight: 22, textAlign: 'center' },
+    liveBadge: {
+      position: 'absolute', top: 8, right: 8,
+      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, zIndex: 1,
+    },
+    liveText: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
+  }), [C]);
+
+  useEffect(() => {
+    if (!user?.chamberId) return;
+    apiFetch<Chamber>(`/chambers/${user.chamberId}`).then(c => setChamber(c)).catch(() => {});
+  }, [user?.chamberId]);
+
+  useEffect(() => {
+    if (votingOpen) router.push('/(tabs)/votacao' as any);
+  }, [votingOpen]);
+
+  function go(route: string) { router.push(`/(tabs)/${route}` as any); }
+
+  function handleLeaveSession() {
+    Alert.alert('Sair da Sessão', 'Deseja sair da sessão atual? Sua presença será removida e você será desconectado.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sair da Sessão', style: 'destructive', onPress: logout },
+    ]);
+  }
+
+  const PANEL_INNER = 264;
+
+  const sessionBlock = session ? (
+    <View style={s.sessionBlock}>
+      <View style={s.chamberRow}>
+        {chamber?.logoUrl ? (
+          <Image source={{ uri: `${API_BASE}${chamber.logoUrl}` }} style={s.chamberLogoImg} resizeMode="contain" />
+        ) : (
+          <View style={s.chamberLogo}><Text style={s.chamberLogoStar}>⚖</Text></View>
+        )}
+        <Text style={s.chamberName} numberOfLines={2}>{chamber?.name ?? 'Câmara Municipal'}</Text>
+      </View>
+      <Text style={s.sessionFullTitle}>{sessionTitle(session.number, session.type, chamber)}</Text>
+    </View>
+  ) : (
+    <View style={[s.sessionStatus, { borderColor: C.border }]}>
+      <View style={[s.sessionDot, { backgroundColor: C.textMuted }]} />
+      <Text style={[s.sessionStatusText, { color: C.textMuted }]}>Sem sessão</Text>
+    </View>
+  );
+
+  const leaveBtn = session ? (
+    <TouchableOpacity style={s.leaveSessionBtn} onPress={handleLeaveSession} activeOpacity={0.8}>
+      <Text style={s.leaveSessionText}>Sair da Sessão</Text>
+    </TouchableOpacity>
+  ) : null;
+
+  const userCard = isLandscape ? (
+    <View style={s.userCardLandscape}>
+      {sessionBlock}
+      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
+      <Text style={[s.userName, { textAlign: 'center' }]} numberOfLines={2}>{user?.name}</Text>
+      {user?.party ? <Text style={[s.userParty, { textAlign: 'center' }]}>{user.party}</Text> : null}
+      <View style={[s.roleBadge, { alignSelf: 'center' }]}>
+        <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+      </View>
+      <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border, alignSelf: 'center' }]}>
+        <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+        <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
+          {connected ? 'Conectado' : 'Offline'}
+        </Text>
+      </View>
+      {leaveBtn}
+    </View>
+  ) : (
+    <View style={s.userCard}>
+      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={96} height={110} borderRadius={14} />
+      <View style={s.userInfo}>
+        <Text style={s.userName} numberOfLines={2}>{user?.name}</Text>
+        {user?.party ? <Text style={s.userParty}>{user.party}</Text> : null}
+        <View style={s.roleBadge}>
+          <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+        </View>
+        {sessionBlock}
+        <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
+          <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+          <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
+            {connected ? 'Conectado' : 'Offline'}
+          </Text>
+        </View>
+        {leaveBtn}
+      </View>
+    </View>
+  );
+
+  /* Grid de cards com flex — ocupa toda a altura disponível */
+  const cardsGrid = (
+    <View style={{ flex: 1, gap: 12 }}>
+      {ROWS.map((row, ri) => (
+        <View key={ri} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+          {row.map(card => {
+            const isLive = card.liveKey === 'voting' && votingOpen;
+            return (
+              <TouchableOpacity
+                key={card.route}
+                style={[s.card, { borderColor: isLive ? card.color + '70' : C.border }]}
+                onPress={() => go(card.route)}
+                activeOpacity={0.75}
+              >
+                {isLive && (
+                  <View style={[s.liveBadge, { backgroundColor: card.color }]}>
+                    <Text style={s.liveText}>AO VIVO</Text>
+                  </View>
+                )}
+                <View style={[s.cardIconWrap, { backgroundColor: isDark ? card.color + '18' : card.color }]}>
+                  <Text style={s.cardEmoji}>{card.emoji}</Text>
+                </View>
+                <View style={s.cardBody}>
+                  <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2}>
+                    {card.title}
+                  </Text>
+                  <Text style={s.cardDesc} numberOfLines={2}>{card.desc}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+          {row.length < COLS && <View style={{ flex: 1 }} />}
+        </View>
+      ))}
+    </View>
+  );
+
+  /* ── Landscape ── */
+  if (isLandscape) {
+    return (
+      <SafeAreaView style={s.root} edges={['top', 'bottom']}>
+        <View style={s.landscapeContainer}>
+          <View style={s.landscapeLeft}>{userCard}</View>
+          <View style={{ flex: 1, padding: 20 }}>
+            {cardsGrid}
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  /* ── Portrait ── */
+  return (
+    <SafeAreaView style={s.root} edges={['top', 'bottom']}>
+      <View style={{ flex: 1, padding: 20, gap: 20 }}>
+        {userCard}
+        <View style={s.divider} />
+        {cardsGrid}
+      </View>
+    </SafeAreaView>
+  );
+}
