@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-export const API_URL = 'https://affected-navigate-sets-payments.trycloudflare.com/api';
+export const API_URL = 'https://eplenarius-backend.onrender.com/api';
 
 async function fetchWithTimeout(url: string, options: RequestInit, ms = 10000): Promise<Response> {
   const controller = new AbortController();
