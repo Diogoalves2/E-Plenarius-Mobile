@@ -43,20 +43,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function login(identifier: string, password: string) {
+    const url = `${API_URL}/auth/login`;
+    const body = JSON.stringify({ identifier, password });
+
+    async function attempt(timeoutMs: number): Promise<Response> {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     let res: Response;
     try {
-      res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password }),
-      });
+      // 1ª tentativa: 15s. Se falhar por rede/timeout, tenta de novo com 30s
+      // (cobre cold start do Render após inatividade).
+      try {
+        res = await attempt(15000);
+      } catch (firstErr: any) {
+        if (firstErr?.name !== 'AbortError' && !/network/i.test(firstErr?.message ?? '')) {
+          throw firstErr;
+        }
+        res = await attempt(30000);
+      }
     } catch (err: any) {
-      throw new Error(`Erro de rede: ${err?.message ?? String(err)}\n\nURL: ${API_URL}/auth/login`);
+      if (err?.name === 'AbortError') {
+        throw new Error('O servidor demorou demais para responder. Tente novamente em alguns segundos.');
+      }
+      throw new Error('Sem conexão com o servidor. Verifique sua internet.');
     }
 
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error((body as any)?.message || `HTTP ${res.status}`);
+      const errBody = await res.json().catch(() => ({} as any));
+      const serverMsg = (errBody as any)?.message;
+
+      if (res.status === 401) throw new Error('Usuário ou senha incorretos.');
+      if (res.status === 403) throw new Error(serverMsg || 'Sua conta está desativada. Contate o administrador.');
+      if (res.status === 400) {
+        const msg = Array.isArray(serverMsg) ? serverMsg.join(' · ') : serverMsg;
+        throw new Error(msg || 'Dados inválidos. Verifique os campos.');
+      }
+      if (res.status === 429) throw new Error('Muitas tentativas. Aguarde um instante e tente novamente.');
+      if (res.status >= 500) throw new Error(serverMsg || 'Erro no servidor. Tente novamente em alguns instantes.');
+      throw new Error(serverMsg || `Erro inesperado (HTTP ${res.status}).`);
     }
 
     const { accessToken, refreshToken, user: u } = await res.json();
