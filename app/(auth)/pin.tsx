@@ -88,17 +88,17 @@ export default function PinScreen() {
 
     errorText: { color: '#dc2626', fontSize: 14, marginTop: 20, textAlign: 'center', fontWeight: '600', minHeight: 22 },
 
-    pad: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: 40, paddingBottom: 40 },
-    padRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 18 },
+    pad: { alignSelf: 'center', paddingBottom: 32, marginTop: 'auto' },
+    padRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
     key: {
-      width: 84, height: 84, borderRadius: 42,
+      width: 84, height: 84, borderRadius: 16,
       backgroundColor: C.card, borderWidth: 1, borderColor: C.border,
       alignItems: 'center', justifyContent: 'center',
     },
-    keyPressed: { backgroundColor: C.surface, transform: [{ scale: 0.95 }] },
-    keyTxt: { color: C.text, fontSize: 30, fontWeight: '600' },
+    keyPressed: { backgroundColor: C.surface, transform: [{ scale: 0.96 }] },
+    keyTxt: { color: C.text, fontSize: 32, fontWeight: '600' },
     keyEmpty: { backgroundColor: 'transparent', borderWidth: 0 },
-    bsTxt: { color: C.text, fontSize: 22, fontWeight: '600' },
+    bsTxt: { color: C.text, fontSize: 24, fontWeight: '600' },
   }), [C]);
 
   return (

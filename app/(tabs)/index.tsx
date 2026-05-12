@@ -183,11 +183,22 @@ export default function HomeScreen() {
     </View>
   );
 
-  const leaveBtn = session ? (
-    <TouchableOpacity style={s.leaveSessionBtn} onPress={handleLeaveSession} activeOpacity={0.8}>
-      <Text style={s.leaveSessionText}>Sair da Sessão</Text>
+  function handleLogout() {
+    Alert.alert('Sair', 'Deseja sair do app? Você precisará digitar seu PIN novamente para entrar.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sair', style: 'destructive', onPress: logout },
+    ]);
+  }
+
+  const leaveBtn = (
+    <TouchableOpacity
+      style={s.leaveSessionBtn}
+      onPress={session ? handleLeaveSession : handleLogout}
+      activeOpacity={0.8}
+    >
+      <Text style={s.leaveSessionText}>{session ? 'Sair da Sessão' : 'Sair'}</Text>
     </TouchableOpacity>
-  ) : null;
+  );
 
   const userCard = isLandscape ? (
     <View style={s.userCardLandscape}>

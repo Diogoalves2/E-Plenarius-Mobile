@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  useWindowDimensions,
+  useWindowDimensions, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,7 +24,7 @@ const COLS = 2;
 
 export default function PresidenteHomeScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { colors: C, isDark } = useTheme();
   const { session } = useActiveSession();
   const { votingOpen, connected } = useVotingSocket(session?.id ?? null);
@@ -75,6 +75,13 @@ export default function PresidenteHomeScreen() {
     },
     connDot: { width: 9, height: 9, borderRadius: 5 },
     connText: { fontSize: 16, fontWeight: '600' },
+    logoutBtn: {
+      borderRadius: 14, paddingVertical: 14,
+      backgroundColor: 'rgba(239,68,68,0.1)',
+      borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
+      alignItems: 'center',
+    },
+    logoutText: { color: C.danger, fontSize: 16, fontWeight: '700' },
     divider: { height: 1, backgroundColor: C.border },
     card: {
       flex: 1, backgroundColor: C.card, borderRadius: 20,
@@ -98,6 +105,19 @@ export default function PresidenteHomeScreen() {
 
   function go(route: string) { router.push(`/(presidente)/${route}` as any); }
 
+  function handleLogout() {
+    Alert.alert('Sair', 'Deseja sair do app? Você precisará digitar seu PIN novamente para entrar.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Sair', style: 'destructive', onPress: logout },
+    ]);
+  }
+
+  const logoutBtn = (
+    <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+      <Text style={s.logoutText}>Sair</Text>
+    </TouchableOpacity>
+  );
+
   const PANEL_INNER = 264;
 
   const userCard = isLandscape ? (
@@ -120,6 +140,7 @@ export default function PresidenteHomeScreen() {
           {connected ? 'Conectado' : 'Offline'}
         </Text>
       </View>
+      {logoutBtn}
     </View>
   ) : (
     <View style={s.userCard}>
@@ -142,6 +163,7 @@ export default function PresidenteHomeScreen() {
             {connected ? 'Conectado' : 'Offline'}
           </Text>
         </View>
+        {logoutBtn}
       </View>
     </View>
   );
