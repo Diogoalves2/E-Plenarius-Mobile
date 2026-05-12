@@ -6,7 +6,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 function RootGuard() {
-  const { user, loading } = useAuth();
+  const { user, loading, chamberSlug } = useAuth();
   const { colors: C } = useTheme();
   const segments = useSegments();
   const router = useRouter();
@@ -14,12 +14,22 @@ function RootGuard() {
   useEffect(() => {
     if (loading) return;
     const inAuth = segments[0] === '(auth)';
-    if (!user && !inAuth) router.replace('/(auth)/login');
+    const currentScreen = segments[1];
+
+    if (!user) {
+      if (!chamberSlug && currentScreen !== 'setup') {
+        router.replace('/(auth)/setup');
+      } else if (chamberSlug && (!inAuth || currentScreen === 'setup')) {
+        router.replace('/(auth)/login');
+      }
+      return;
+    }
+
     if (user && inAuth) {
       if (user.role === 'presidente') router.replace('/(presidente)');
       else router.replace('/(tabs)');
     }
-  }, [user, loading, segments]);
+  }, [user, loading, chamberSlug, segments]);
 
   if (loading) {
     return (

@@ -1,140 +1,169 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
+  Image, RefreshControl,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { API_URL } from '@/lib/api';
 
-export default function LoginScreen() {
-  const { login } = useAuth();
+interface Vereador {
+  id: string;
+  name: string;
+  initials: string;
+  party: string | null;
+  title: string | null;
+  avatarUrl: string | null;
+  hasPin: boolean;
+}
+
+const API_BASE = API_URL.replace(/\/api$/, '');
+
+export default function LoginGridScreen() {
+  const router = useRouter();
+  const { chamberSlug, setChamberSlug } = useAuth();
   const { colors: C } = useTheme();
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [vereadores, setVereadores] = useState<Vereador[]>([]);
+  const [chamberName, setChamberName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const s = useMemo(() => StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.bg },
-    inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 32 },
-    logoWrap: { alignItems: 'center', marginBottom: 40 },
-    logo: {
-      width: 72, height: 72, borderRadius: 20,
-      backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center',
-      marginBottom: 12, shadowColor: C.primary, shadowOpacity: 0.4,
-      shadowRadius: 20, elevation: 10,
-    },
-    logoText: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: 1 },
-    appName: { color: C.text, fontSize: 26, fontWeight: '700', letterSpacing: -0.5 },
-    appSub: { color: C.textMuted, fontSize: 13, marginTop: 4 },
-    form: {
-      backgroundColor: C.card,
-      borderRadius: 20, padding: 24,
-      borderWidth: 1, borderColor: C.border,
-    },
-    label: {
-      color: C.textMuted, fontSize: 11,
-      fontWeight: '600', letterSpacing: 1, marginBottom: 6,
-    },
-    input: {
-      backgroundColor: C.surface, borderRadius: 12,
-      borderWidth: 1, borderColor: C.border,
-      paddingHorizontal: 16, paddingVertical: 14,
-      color: C.text, fontSize: 15,
-    },
-    inputWrap: {
-      flexDirection: 'row', alignItems: 'center',
-      backgroundColor: C.surface, borderRadius: 12,
-      borderWidth: 1, borderColor: C.border,
-      paddingHorizontal: 16,
-    },
-    eyeBtn: { paddingLeft: 12, paddingVertical: 14 },
-    eyeText: { color: C.textMuted, fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
-    btn: {
-      marginTop: 24, backgroundColor: C.primary, borderRadius: 14,
-      paddingVertical: 15, alignItems: 'center',
-      shadowColor: C.primary, shadowOpacity: 0.35, shadowRadius: 12, elevation: 6,
-    },
-    btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-    footer: { color: C.textMuted, fontSize: 12, textAlign: 'center', marginTop: 32 },
-  }), [C]);
-
-  async function handleLogin() {
-    if (!identifier.trim() || !password.trim()) {
-      Alert.alert('Atenção', 'Preencha usuário e senha.');
-      return;
-    }
-    setLoading(true);
+  const loadData = useCallback(async () => {
+    if (!chamberSlug) return;
+    setError(null);
     try {
-      await login(identifier.trim().toLowerCase(), password);
-    } catch (err: any) {
-      Alert.alert('Erro ao entrar', err.message || 'Verifique suas credenciais.');
+      const [chamRes, vereRes] = await Promise.all([
+        fetch(`${API_URL}/chambers/by-slug/${chamberSlug}`),
+        fetch(`${API_URL}/chambers/by-slug/${chamberSlug}/vereadores`),
+      ]);
+      if (!chamRes.ok || !vereRes.ok) throw new Error('Câmara não encontrada.');
+      const cham = await chamRes.json();
+      const vers = await vereRes.json();
+      setChamberName(cham.name);
+      setVereadores(vers);
+    } catch (e: any) {
+      setError(e.message || 'Erro ao carregar lista de vereadores.');
     } finally {
       setLoading(false);
     }
+  }, [chamberSlug]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  function selectVereador(v: Vereador) {
+    if (!v.hasPin) {
+      // Mostra alerta amigável ao invés de só silenciar
+      // — usando setError pra aparecer abaixo do grid
+      setError(`${v.name} ainda não tem PIN cadastrado. Solicite ao presidente que configure no painel web.`);
+      return;
+    }
+    router.push({ pathname: '/(auth)/pin', params: { userId: v.id, name: v.name, initials: v.initials, avatarUrl: v.avatarUrl ?? '', title: v.title ?? '', party: v.party ?? '' } });
+  }
+
+  async function changeChamber() {
+    await setChamberSlug(null);
+  }
+
+  const s = useMemo(() => StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.bg },
+    header: {
+      paddingTop: 56, paddingHorizontal: 24, paddingBottom: 20,
+      alignItems: 'center', backgroundColor: C.bg,
+    },
+    title: { color: C.text, fontSize: 26, fontWeight: '700', letterSpacing: -0.5, textAlign: 'center' },
+    chamber: { color: C.primary, fontSize: 13, fontWeight: '700', marginTop: 4, letterSpacing: 0.5 },
+    sub: { color: C.textMuted, fontSize: 14, marginTop: 12, textAlign: 'center' },
+    grid: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 12 },
+    card: {
+      flex: 1, margin: 8, backgroundColor: C.card,
+      borderRadius: 18, borderWidth: 1, borderColor: C.border,
+      padding: 18, alignItems: 'center',
+      minHeight: 180,
+    },
+    cardDisabled: { opacity: 0.45 },
+    avatar: {
+      width: 76, height: 76, borderRadius: 38,
+      backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
+      borderWidth: 2, borderColor: C.border, overflow: 'hidden',
+    },
+    avatarImg: { width: '100%', height: '100%' },
+    initials: { color: C.text, fontSize: 24, fontWeight: '700' },
+    name: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 12, textAlign: 'center' },
+    role: { color: C.textMuted, fontSize: 11, marginTop: 3, fontWeight: '600', letterSpacing: 0.4 },
+    noPin: { color: '#f59e0b', fontSize: 10, marginTop: 6, fontWeight: '700', letterSpacing: 0.4 },
+    footer: { paddingHorizontal: 24, paddingBottom: 24, alignItems: 'center' },
+    changeBtn: { paddingVertical: 12, paddingHorizontal: 20 },
+    changeText: { color: C.textMuted, fontSize: 13, fontWeight: '600' },
+    errorBox: {
+      margin: 16, padding: 14, borderRadius: 12,
+      backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
+    },
+    errorText: { color: '#dc2626', fontSize: 13, lineHeight: 19 },
+    loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    empty: { padding: 48, alignItems: 'center' },
+    emptyText: { color: C.textMuted, fontSize: 14, textAlign: 'center' },
+  }), [C]);
+
+  if (loading) {
+    return (
+      <View style={[s.root, s.loadingWrap]}>
+        <ActivityIndicator color={C.primary} size="large" />
+        <Text style={[s.sub, { marginTop: 16 }]}>Carregando vereadores…</Text>
+      </View>
+    );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={s.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={s.inner}>
-        <View style={s.logoWrap}>
-          <View style={s.logo}>
-            <Text style={s.logoText}>EP</Text>
-          </View>
-          <Text style={s.appName}>E-Plenarius</Text>
-          <Text style={s.appSub}>Sistema de Gestão de Sessões</Text>
-        </View>
-
-        <View style={s.form}>
-          <Text style={s.label}>USUÁRIO OU E-MAIL</Text>
-          <TextInput
-            style={s.input}
-            value={identifier}
-            onChangeText={setIdentifier}
-            placeholder="pedro ou pedro@camara.leg.br"
-            placeholderTextColor={C.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Text style={[s.label, { marginTop: 16 }]}>SENHA</Text>
-          <View style={s.inputWrap}>
-            <TextInput
-              style={[s.input, { flex: 1, borderWidth: 0, paddingRight: 0 }]}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="••••••••"
-              placeholderTextColor={C.textMuted}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(v => !v)}
-              style={s.eyeBtn}
-              activeOpacity={0.6}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={s.eyeText}>{showPassword ? 'OCULTAR' : 'VER'}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={[s.btn, loading && { opacity: 0.6 }]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={s.btnText}>Entrar</Text>
-            }
-          </TouchableOpacity>
-        </View>
-
-        <Text style={s.footer}>v1.0.0 · E-Plenarius</Text>
+    <View style={s.root}>
+      <View style={s.header}>
+        <Text style={s.title}>{chamberName ?? '…'}</Text>
+        <Text style={s.chamber}>{chamberSlug?.toUpperCase()}</Text>
+        <Text style={s.sub}>Toque na sua foto para entrar</Text>
       </View>
-    </KeyboardAvoidingView>
+
+      {error && (
+        <View style={s.errorBox}>
+          <Text style={s.errorText}>{error}</Text>
+        </View>
+      )}
+
+      <FlatList
+        data={vereadores}
+        numColumns={2}
+        keyExtractor={v => v.id}
+        contentContainerStyle={s.grid}
+        refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} tintColor={C.primary} />}
+        ListEmptyComponent={
+          <View style={s.empty}>
+            <Text style={s.emptyText}>Nenhum vereador encontrado nessa câmara.</Text>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[s.card, !item.hasPin && s.cardDisabled]}
+            onPress={() => selectVereador(item)}
+            activeOpacity={0.7}
+          >
+            <View style={s.avatar}>
+              {item.avatarUrl ? (
+                <Image source={{ uri: `${API_BASE}${item.avatarUrl}` }} style={s.avatarImg} resizeMode="cover" />
+              ) : (
+                <Text style={s.initials}>{item.initials || item.name.slice(0, 2).toUpperCase()}</Text>
+              )}
+            </View>
+            <Text style={s.name} numberOfLines={2}>{item.name}</Text>
+            {item.title && <Text style={s.role}>{item.title.toUpperCase()}{item.party ? ` · ${item.party}` : ''}</Text>}
+            {!item.hasPin && <Text style={s.noPin}>SEM PIN</Text>}
+          </TouchableOpacity>
+        )}
+      />
+
+      <View style={s.footer}>
+        <TouchableOpacity style={s.changeBtn} onPress={changeChamber} activeOpacity={0.6}>
+          <Text style={s.changeText}>Trocar câmara</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
