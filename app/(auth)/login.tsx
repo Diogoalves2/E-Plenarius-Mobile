@@ -6,7 +6,6 @@ import {
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { API_URL } from '@/lib/api';
 
 interface Vereador {
@@ -32,10 +31,25 @@ interface ChamberInfo {
 const API_BASE = API_URL.replace(/\/api$/, '');
 const LAST_USER_KEY = 'last_vereador_id';
 
+/* ── Paleta light fixa (ignora tema do sistema) ─────────────── */
+const C = {
+  bg: '#FFFFFF',
+  surface: '#F5F6F8',
+  card: '#FFFFFF',
+  border: '#E4E7ED',
+  text: '#0D1117',
+  textMuted: '#8A94A2',
+  primary: '#1447E6',
+  primaryDark: '#0F37B8',
+  warningBg: '#FFFBEB',
+  warningBorder: '#FCD34D',
+  warningText: '#92400E',
+  danger: '#DC2626',
+};
+
 export default function LoginGridScreen() {
   const router = useRouter();
   const { chamberSlug, setChamberSlug } = useAuth();
-  const { colors: C } = useTheme();
   const [vereadores, setVereadores] = useState<Vereador[]>([]);
   const [chamber, setChamber] = useState<ChamberInfo | null>(null);
   const [lastUserId, setLastUserId] = useState<string | null>(null);
@@ -57,7 +71,6 @@ export default function LoginGridScreen() {
       const vers: Vereador[] = await vereRes.json();
       setChamber(cham);
       setVereadores(vers);
-      // Se há último usuário salvo E ele ainda existe na lista E tem PIN → mostra atalho
       if (savedLast && vers.some(v => v.id === savedLast && v.hasPin)) {
         setLastUserId(savedLast);
         setShowGrid(false);
@@ -99,197 +112,139 @@ export default function LoginGridScreen() {
     });
   }
 
-  async function changeChamber() {
-    await SecureStore.deleteItemAsync(LAST_USER_KEY);
-    await setChamberSlug(null);
-  }
-
   const lastUser = lastUserId ? vereadores.find(v => v.id === lastUserId) : null;
-
-  const s = useMemo(() => StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.bg },
-    header: {
-      paddingTop: 56, paddingHorizontal: 24, paddingBottom: 16,
-      alignItems: 'center', backgroundColor: C.bg,
-    },
-    title: { color: C.text, fontSize: 26, fontWeight: '700', letterSpacing: -0.5, textAlign: 'center' },
-    chamberBadge: { color: C.primary, fontSize: 13, fontWeight: '700', marginTop: 4, letterSpacing: 0.5 },
-    sub: { color: C.textMuted, fontSize: 14, marginTop: 10, textAlign: 'center' },
-
-    /* Banner de aviso */
-    banner: {
-      marginHorizontal: 16, marginTop: 8, padding: 16, borderRadius: 14,
-      flexDirection: 'row', gap: 12, alignItems: 'flex-start',
-    },
-    bannerWarning: {
-      backgroundColor: 'rgba(245,158,11,0.12)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.4)',
-    },
-    bannerSuccess: {
-      backgroundColor: 'rgba(16,185,129,0.12)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.4)',
-    },
-    bannerIcon: { fontSize: 22 },
-    bannerBody: { flex: 1 },
-    bannerTitleWarn: { color: '#92400e', fontSize: 15, fontWeight: '700' },
-    bannerTitleOk:   { color: '#047857', fontSize: 15, fontWeight: '700' },
-    bannerText: { color: C.text, fontSize: 13, marginTop: 4, lineHeight: 18 },
-
-    /* Atalho do último usuário */
-    quickCard: {
-      marginHorizontal: 24, marginTop: 20, padding: 20,
-      backgroundColor: C.card, borderRadius: 20, borderWidth: 1, borderColor: C.border,
-      alignItems: 'center',
-    },
-    quickAvatar: {
-      width: 110, height: 110, borderRadius: 55,
-      backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
-      borderWidth: 3, borderColor: C.primary, overflow: 'hidden',
-    },
-    quickAvatarImg: { width: '100%', height: '100%' },
-    quickInitials: { color: C.text, fontSize: 38, fontWeight: '700' },
-    quickName: { color: C.text, fontSize: 20, fontWeight: '700', marginTop: 14, textAlign: 'center' },
-    quickRole: { color: C.textMuted, fontSize: 13, marginTop: 4, fontWeight: '600', letterSpacing: 0.4 },
-    quickBtn: {
-      marginTop: 20, paddingHorizontal: 40, paddingVertical: 16,
-      backgroundColor: C.primary, borderRadius: 14, alignSelf: 'stretch', alignItems: 'center',
-    },
-    quickBtnDisabled: { backgroundColor: C.border },
-    quickBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
-    quickBtnTextDisabled: { color: C.textMuted },
-    quickSwitchBtn: { marginTop: 14, paddingVertical: 8 },
-    quickSwitchText: { color: C.primary, fontSize: 14, fontWeight: '600' },
-
-    /* Grid */
-    grid: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 12 },
-    card: {
-      flex: 1, margin: 8, backgroundColor: C.card,
-      borderRadius: 18, borderWidth: 1, borderColor: C.border,
-      padding: 18, alignItems: 'center',
-      minHeight: 180,
-    },
-    cardDisabled: { opacity: 0.45 },
-    avatar: {
-      width: 76, height: 76, borderRadius: 38,
-      backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
-      borderWidth: 2, borderColor: C.border, overflow: 'hidden',
-    },
-    avatarImg: { width: '100%', height: '100%' },
-    initials: { color: C.text, fontSize: 24, fontWeight: '700' },
-    name: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 12, textAlign: 'center' },
-    role: { color: C.textMuted, fontSize: 11, marginTop: 3, fontWeight: '600', letterSpacing: 0.4 },
-    badge: { fontSize: 10, marginTop: 6, fontWeight: '700', letterSpacing: 0.4 },
-    badgeNoPin: { color: '#f59e0b' },
-    badgeWait: { color: '#f59e0b' },
-
-    footer: { paddingHorizontal: 24, paddingBottom: 24, alignItems: 'center' },
-    changeBtn: { paddingVertical: 12, paddingHorizontal: 20 },
-    changeText: { color: C.textMuted, fontSize: 13, fontWeight: '600' },
-
-    errorBox: {
-      margin: 16, padding: 14, borderRadius: 12,
-      backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
-    },
-    errorText: { color: '#dc2626', fontSize: 13, lineHeight: 19 },
-    loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-    empty: { padding: 48, alignItems: 'center' },
-    emptyText: { color: C.textMuted, fontSize: 14, textAlign: 'center' },
-  }), [C]);
 
   if (loading) {
     return (
       <View style={[s.root, s.loadingWrap]}>
         <ActivityIndicator color={C.primary} size="large" />
-        <Text style={[s.sub, { marginTop: 16 }]}>Carregando…</Text>
+        <Text style={[s.loadingText, { marginTop: 16 }]}>Carregando…</Text>
       </View>
     );
   }
 
-  const sessionBanner = chamber && !chamber.hasActiveSession ? (
-    <View style={[s.banner, s.bannerWarning]}>
-      <Text style={s.bannerIcon}>⚠️</Text>
-      <View style={s.bannerBody}>
-        <Text style={s.bannerTitleWarn}>Sem sessão em andamento</Text>
-        <Text style={s.bannerText}>
-          Vereadores só podem entrar com uma sessão aberta. Aguarde o presidente iniciar a sessão.
-        </Text>
-      </View>
-    </View>
-  ) : chamber?.hasActiveSession ? (
-    <View style={[s.banner, s.bannerSuccess]}>
-      <Text style={s.bannerIcon}>🟢</Text>
-      <View style={s.bannerBody}>
-        <Text style={s.bannerTitleOk}>Sessão em andamento</Text>
-        <Text style={s.bannerText}>Toque na sua foto para entrar.</Text>
-      </View>
-    </View>
-  ) : null;
-
-  /* ── Atalho do último vereador ── */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  Atalho — vereador salvo                                    */
+  /* ─────────────────────────────────────────────────────────── */
   if (lastUser && !showGrid) {
     const allowed = canLogin(lastUser);
+    const avatarUri = lastUser.avatarUrl ? `${API_BASE}${lastUser.avatarUrl}` : null;
+    const showNoSessionWarn = lastUser.role !== 'presidente' && chamber && !chamber.hasActiveSession;
+
     return (
       <View style={s.root}>
-        <View style={s.header}>
-          <Text style={s.title}>{chamber?.name ?? '…'}</Text>
-          <Text style={s.chamberBadge}>{chamberSlug?.toUpperCase()}</Text>
-        </View>
-
-        {sessionBanner}
-
-        <View style={s.quickCard}>
-          <View style={s.quickAvatar}>
-            {lastUser.avatarUrl ? (
-              <Image source={{ uri: `${API_BASE}${lastUser.avatarUrl}` }} style={s.quickAvatarImg} resizeMode="cover" />
+        <View style={s.splitContainer}>
+          {/* ── ESQUERDA — Foto do vereador, altura total ── */}
+          <View style={s.leftPhotoWrap}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={s.leftPhoto} resizeMode="cover" />
             ) : (
-              <Text style={s.quickInitials}>{lastUser.initials || lastUser.name.slice(0, 2).toUpperCase()}</Text>
+              <View style={[s.leftPhoto, s.leftPhotoFallback]}>
+                <Text style={s.leftPhotoInitials}>
+                  {lastUser.initials || lastUser.name.slice(0, 2).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={s.leftPhotoOverlay} />
+          </View>
+
+          {/* ── DIREITA — Formulário ── */}
+          <View style={s.rightForm}>
+            {/* Topo: logo + nome da câmara */}
+            <View style={s.chamberHeader}>
+              {chamber?.logoUrl ? (
+                <Image source={{ uri: `${API_BASE}${chamber.logoUrl}` }} style={s.chamberLogo} resizeMode="contain" />
+              ) : (
+                <View style={s.chamberLogoFallback}>
+                  <Text style={s.chamberLogoFallbackText}>⚖</Text>
+                </View>
+              )}
+              <Text style={s.chamberName} numberOfLines={2}>{chamber?.name ?? 'E-Plenarius'}</Text>
+            </View>
+
+            {/* Vereador info */}
+            <View style={s.userBlock}>
+              <Text style={s.greeting}>Olá,</Text>
+              <Text style={s.userName} numberOfLines={2}>{lastUser.name}</Text>
+              {lastUser.title ? (
+                <Text style={s.userRole}>
+                  {lastUser.title.toUpperCase()}{lastUser.party ? ` · ${lastUser.party}` : ''}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Aviso de sem sessão (somente quando não há sessão) */}
+            {showNoSessionWarn && (
+              <View style={s.warningBox}>
+                <Text style={s.warningIcon}>⚠️</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.warningTitle}>Sem sessão em andamento</Text>
+                  <Text style={s.warningText}>
+                    Aguarde o presidente iniciar a sessão para entrar.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Botão entrar */}
+            <Pressable
+              onPress={() => selectVereador(lastUser)}
+              disabled={!allowed}
+              style={({ pressed }) => [
+                s.primaryBtn,
+                !allowed && s.primaryBtnDisabled,
+                pressed && allowed && s.primaryBtnPressed,
+              ]}
+            >
+              <Text style={[s.primaryBtnText, !allowed && s.primaryBtnTextDisabled]}>
+                {allowed ? 'Entrar' : (lastUser.role === 'presidente' ? 'PIN não cadastrado' : 'Aguardando sessão')}
+              </Text>
+            </Pressable>
+
+            {/* Trocar usuário */}
+            <Pressable
+              onPress={() => setShowGrid(true)}
+              style={({ pressed }) => [s.switchUserBtn, pressed && { opacity: 0.6 }]}
+            >
+              <Text style={s.switchUserLabel}>Não é você?</Text>
+              <Text style={s.switchUserLink}>Trocar usuário</Text>
+            </Pressable>
+
+            {error && (
+              <View style={s.errorBox}>
+                <Text style={s.errorText}>{error}</Text>
+              </View>
             )}
           </View>
-          <Text style={s.quickName}>{lastUser.name}</Text>
-          {lastUser.title ? (
-            <Text style={s.quickRole}>
-              {lastUser.title.toUpperCase()}{lastUser.party ? ` · ${lastUser.party}` : ''}
-            </Text>
-          ) : null}
-
-          <Pressable
-            onPress={() => selectVereador(lastUser)}
-            style={({ pressed }) => [s.quickBtn, !allowed && s.quickBtnDisabled, pressed && allowed && { opacity: 0.85 }]}
-            disabled={!allowed}
-          >
-            <Text style={[s.quickBtnText, !allowed && s.quickBtnTextDisabled]}>
-              {allowed ? 'Entrar' : (lastUser.role === 'presidente' ? 'Sem PIN' : 'Aguardando sessão')}
-            </Text>
-          </Pressable>
-
-          <TouchableOpacity onPress={() => setShowGrid(true)} style={s.quickSwitchBtn} activeOpacity={0.6}>
-            <Text style={s.quickSwitchText}>Não é você? Trocar usuário</Text>
-          </TouchableOpacity>
-        </View>
-
-        {error && (
-          <View style={s.errorBox}>
-            <Text style={s.errorText}>{error}</Text>
-          </View>
-        )}
-
-        <View style={[s.footer, { marginTop: 'auto' }]}>
-          <TouchableOpacity style={s.changeBtn} onPress={changeChamber} activeOpacity={0.6}>
-            <Text style={s.changeText}>Trocar câmara</Text>
-          </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  /* ── Grid ── */
+  /* ─────────────────────────────────────────────────────────── */
+  /*  Grid de vereadores                                         */
+  /* ─────────────────────────────────────────────────────────── */
   return (
     <View style={s.root}>
-      <View style={s.header}>
-        <Text style={s.title}>{chamber?.name ?? '…'}</Text>
-        <Text style={s.chamberBadge}>{chamberSlug?.toUpperCase()}</Text>
-        <Text style={s.sub}>Toque na sua foto para entrar</Text>
+      <View style={s.gridHeader}>
+        {chamber?.logoUrl ? (
+          <Image source={{ uri: `${API_BASE}${chamber.logoUrl}` }} style={s.gridChamberLogo} resizeMode="contain" />
+        ) : null}
+        <Text style={s.gridChamberName} numberOfLines={2}>{chamber?.name ?? '…'}</Text>
+        <Text style={s.gridSub}>Toque na sua foto para entrar</Text>
       </View>
 
-      {sessionBanner}
+      {chamber && !chamber.hasActiveSession && (
+        <View style={s.warningBox}>
+          <Text style={s.warningIcon}>⚠️</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={s.warningTitle}>Sem sessão em andamento</Text>
+            <Text style={s.warningText}>
+              Vereadores só podem entrar com uma sessão aberta. Aguarde o presidente iniciar a sessão.
+            </Text>
+          </View>
+        </View>
+      )}
 
       {error && (
         <View style={s.errorBox}>
@@ -316,29 +271,124 @@ export default function LoginGridScreen() {
               onPress={() => selectVereador(item)}
               activeOpacity={0.7}
             >
-              <View style={s.avatar}>
+              <View style={s.cardAvatar}>
                 {item.avatarUrl ? (
-                  <Image source={{ uri: `${API_BASE}${item.avatarUrl}` }} style={s.avatarImg} resizeMode="cover" />
+                  <Image source={{ uri: `${API_BASE}${item.avatarUrl}` }} style={s.cardAvatarImg} resizeMode="cover" />
                 ) : (
-                  <Text style={s.initials}>{item.initials || item.name.slice(0, 2).toUpperCase()}</Text>
+                  <Text style={s.cardInitials}>{item.initials || item.name.slice(0, 2).toUpperCase()}</Text>
                 )}
               </View>
-              <Text style={s.name} numberOfLines={2}>{item.name}</Text>
-              {item.title && <Text style={s.role}>{item.title.toUpperCase()}{item.party ? ` · ${item.party}` : ''}</Text>}
-              {!item.hasPin && <Text style={[s.badge, s.badgeNoPin]}>SEM PIN</Text>}
+              <Text style={s.cardName} numberOfLines={2}>{item.name}</Text>
+              {item.title && <Text style={s.cardRole}>{item.title.toUpperCase()}{item.party ? ` · ${item.party}` : ''}</Text>}
+              {!item.hasPin && <Text style={[s.cardBadge, s.cardBadgeWarn]}>SEM PIN</Text>}
               {item.hasPin && item.role === 'vereador' && !chamber?.hasActiveSession && (
-                <Text style={[s.badge, s.badgeWait]}>AGUARDANDO SESSÃO</Text>
+                <Text style={[s.cardBadge, s.cardBadgeWarn]}>AGUARDANDO SESSÃO</Text>
               )}
             </TouchableOpacity>
           );
         }}
       />
-
-      <View style={s.footer}>
-        <TouchableOpacity style={s.changeBtn} onPress={changeChamber} activeOpacity={0.6}>
-          <Text style={s.changeText}>Trocar câmara</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
+
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bg },
+  loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { color: C.textMuted, fontSize: 15 },
+
+  /* ── Layout split (foto esquerda + form direita) ── */
+  splitContainer: { flex: 1, flexDirection: 'row' },
+  leftPhotoWrap: { flex: 1, backgroundColor: C.surface, overflow: 'hidden' },
+  leftPhoto: { width: '100%', height: '100%' },
+  leftPhotoFallback: { alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary },
+  leftPhotoInitials: { color: '#fff', fontSize: 120, fontWeight: '800' },
+  leftPhotoOverlay: {
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    height: 80, backgroundColor: 'rgba(255,255,255,0.0)',
+  },
+
+  rightForm: {
+    flex: 1, padding: 48, justifyContent: 'center',
+    backgroundColor: C.bg,
+  },
+  chamberHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    paddingBottom: 24, marginBottom: 28,
+    borderBottomWidth: 1, borderBottomColor: C.border,
+  },
+  chamberLogo: { width: 56, height: 56 },
+  chamberLogoFallback: {
+    width: 56, height: 56, borderRadius: 14,
+    backgroundColor: C.primary + '15', alignItems: 'center', justifyContent: 'center',
+  },
+  chamberLogoFallbackText: { fontSize: 28, color: C.primary },
+  chamberName: { flex: 1, color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5, lineHeight: 28 },
+
+  userBlock: { marginBottom: 28 },
+  greeting: { color: C.textMuted, fontSize: 16, fontWeight: '500', marginBottom: 4 },
+  userName: { color: C.text, fontSize: 30, fontWeight: '800', letterSpacing: -0.5, lineHeight: 36 },
+  userRole: { color: C.textMuted, fontSize: 14, fontWeight: '700', marginTop: 6, letterSpacing: 0.5 },
+
+  warningBox: {
+    flexDirection: 'row', gap: 12, alignItems: 'flex-start',
+    backgroundColor: C.warningBg, borderWidth: 1, borderColor: C.warningBorder,
+    padding: 16, borderRadius: 14, marginBottom: 24,
+  },
+  warningIcon: { fontSize: 22 },
+  warningTitle: { color: C.warningText, fontSize: 15, fontWeight: '700' },
+  warningText: { color: C.warningText, fontSize: 13, marginTop: 4, lineHeight: 18 },
+
+  primaryBtn: {
+    backgroundColor: C.primary, borderRadius: 14,
+    paddingVertical: 20, alignItems: 'center',
+  },
+  primaryBtnPressed: { backgroundColor: C.primaryDark },
+  primaryBtnDisabled: { backgroundColor: C.border },
+  primaryBtnText: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: 0.3 },
+  primaryBtnTextDisabled: { color: C.textMuted },
+
+  switchUserBtn: {
+    marginTop: 24, paddingVertical: 12, alignItems: 'center',
+  },
+  switchUserLabel: { color: C.textMuted, fontSize: 15, fontWeight: '500' },
+  switchUserLink: { color: C.primary, fontSize: 18, fontWeight: '700', marginTop: 4 },
+
+  errorBox: {
+    marginTop: 16, padding: 14, borderRadius: 12,
+    backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA',
+  },
+  errorText: { color: C.danger, fontSize: 13, lineHeight: 19 },
+
+  /* ── Grid ── */
+  gridHeader: {
+    paddingTop: 56, paddingHorizontal: 24, paddingBottom: 20,
+    alignItems: 'center',
+  },
+  gridChamberLogo: { width: 72, height: 72, marginBottom: 12 },
+  gridChamberName: { color: C.text, fontSize: 32, fontWeight: '800', letterSpacing: -0.7, textAlign: 'center', lineHeight: 38 },
+  gridSub: { color: C.textMuted, fontSize: 15, marginTop: 12, textAlign: 'center' },
+
+  grid: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 12 },
+  card: {
+    flex: 1, margin: 8, backgroundColor: C.card,
+    borderRadius: 18, borderWidth: 1, borderColor: C.border,
+    padding: 18, alignItems: 'center',
+    minHeight: 180,
+  },
+  cardDisabled: { opacity: 0.5 },
+  cardAvatar: {
+    width: 76, height: 76, borderRadius: 38,
+    backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: C.border, overflow: 'hidden',
+  },
+  cardAvatarImg: { width: '100%', height: '100%' },
+  cardInitials: { color: C.text, fontSize: 24, fontWeight: '700' },
+  cardName: { color: C.text, fontSize: 14, fontWeight: '700', marginTop: 12, textAlign: 'center' },
+  cardRole: { color: C.textMuted, fontSize: 11, marginTop: 3, fontWeight: '600', letterSpacing: 0.4 },
+  cardBadge: { fontSize: 10, marginTop: 6, fontWeight: '700', letterSpacing: 0.4 },
+  cardBadgeWarn: { color: C.warningText },
+
+  empty: { padding: 48, alignItems: 'center' },
+  emptyText: { color: C.textMuted, fontSize: 14, textAlign: 'center' },
+});

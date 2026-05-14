@@ -4,12 +4,25 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { API_URL } from '@/lib/api';
+
+/* Paleta light fixa (mesma das outras telas de auth) */
+const C = {
+  bg: '#FFFFFF',
+  surface: '#F5F6F8',
+  card: '#FFFFFF',
+  border: '#E4E7ED',
+  text: '#0D1117',
+  textMuted: '#8A94A2',
+  primary: '#1447E6',
+  primaryDark: '#0F37B8',
+  successBg: '#ECFDF5',
+  successBorder: '#A7F3D0',
+  successText: '#047857',
+};
 
 export default function SetupScreen() {
   const { setChamberSlug } = useAuth();
-  const { colors: C } = useTheme();
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
   const [chamberName, setChamberName] = useState<string | null>(null);
@@ -24,7 +37,7 @@ export default function SetupScreen() {
       marginBottom: 16,
     },
     logoText: { color: '#fff', fontSize: 30, fontWeight: '800', letterSpacing: 1 },
-    title: { color: C.text, fontSize: 28, fontWeight: '700', letterSpacing: -0.5, textAlign: 'center' },
+    title: { color: C.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
     sub: { color: C.textMuted, fontSize: 15, marginTop: 8, textAlign: 'center', lineHeight: 22 },
     form: {
       backgroundColor: C.card,
@@ -49,10 +62,10 @@ export default function SetupScreen() {
     btnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
     confirmBox: {
       marginTop: 18, padding: 16, borderRadius: 12,
-      backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)',
+      backgroundColor: C.successBg, borderWidth: 1, borderColor: C.successBorder,
     },
-    confirmText: { color: '#059669', fontSize: 14, fontWeight: '600' },
-  }), [C]);
+    confirmText: { color: C.successText, fontSize: 14, fontWeight: '600' },
+  }), []);
 
   async function validate() {
     const cleaned = slug.trim().toLowerCase();
