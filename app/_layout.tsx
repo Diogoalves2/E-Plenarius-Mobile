@@ -1,18 +1,20 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SplashIntro } from '@/components/SplashIntro';
 
 function RootGuard() {
   const { user, loading, chamberSlug } = useAuth();
   const { colors: C } = useTheme();
   const segments = useSegments();
   const router = useRouter();
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (!splashDone || loading) return;
     const inAuth = segments[0] === '(auth)';
     const currentScreen = segments[1];
 
@@ -29,14 +31,10 @@ function RootGuard() {
       if (user.role === 'presidente') router.replace('/(presidente)');
       else router.replace('/(tabs)');
     }
-  }, [user, loading, chamberSlug, segments]);
+  }, [user, loading, chamberSlug, segments, splashDone]);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={C.primary} size="large" />
-      </View>
-    );
+  if (!splashDone || loading) {
+    return <SplashIntro onFinish={() => setSplashDone(true)} />;
   }
 
   return (
