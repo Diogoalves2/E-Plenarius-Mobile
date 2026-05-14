@@ -309,50 +309,50 @@ const s = StyleSheet.create({
   },
 
   rightForm: {
-    flex: 1, padding: 48, justifyContent: 'center',
+    flex: 1, padding: 56, justifyContent: 'center',
     backgroundColor: C.bg,
   },
   chamberHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    paddingBottom: 24, marginBottom: 28,
+    flexDirection: 'row', alignItems: 'center', gap: 16,
+    paddingBottom: 28, marginBottom: 32,
     borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  chamberLogo: { width: 56, height: 56 },
+  chamberLogo: { width: 68, height: 68 },
   chamberLogoFallback: {
-    width: 56, height: 56, borderRadius: 14,
+    width: 68, height: 68, borderRadius: 16,
     backgroundColor: C.primary + '15', alignItems: 'center', justifyContent: 'center',
   },
-  chamberLogoFallbackText: { fontSize: 28, color: C.primary },
-  chamberName: { flex: 1, color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5, lineHeight: 28 },
+  chamberLogoFallbackText: { fontSize: 34, color: C.primary },
+  chamberName: { flex: 1, color: C.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.6, lineHeight: 34 },
 
-  userBlock: { marginBottom: 28 },
-  greeting: { color: C.textMuted, fontSize: 16, fontWeight: '500', marginBottom: 4 },
-  userName: { color: C.text, fontSize: 30, fontWeight: '800', letterSpacing: -0.5, lineHeight: 36 },
-  userRole: { color: C.textMuted, fontSize: 14, fontWeight: '700', marginTop: 6, letterSpacing: 0.5 },
+  userBlock: { marginBottom: 32 },
+  greeting: { color: C.textMuted, fontSize: 20, fontWeight: '500', marginBottom: 6 },
+  userName: { color: C.text, fontSize: 40, fontWeight: '800', letterSpacing: -0.7, lineHeight: 46 },
+  userRole: { color: C.textMuted, fontSize: 18, fontWeight: '700', marginTop: 10, letterSpacing: 0.5 },
 
   warningBox: {
-    flexDirection: 'row', gap: 12, alignItems: 'flex-start',
+    flexDirection: 'row', gap: 14, alignItems: 'flex-start',
     backgroundColor: C.warningBg, borderWidth: 1, borderColor: C.warningBorder,
-    padding: 16, borderRadius: 14, marginBottom: 24,
+    padding: 18, borderRadius: 14, marginBottom: 28,
   },
-  warningIcon: { fontSize: 22 },
-  warningTitle: { color: C.warningText, fontSize: 15, fontWeight: '700' },
-  warningText: { color: C.warningText, fontSize: 13, marginTop: 4, lineHeight: 18 },
+  warningIcon: { fontSize: 26 },
+  warningTitle: { color: C.warningText, fontSize: 18, fontWeight: '700' },
+  warningText: { color: C.warningText, fontSize: 15, marginTop: 6, lineHeight: 21 },
 
   primaryBtn: {
     backgroundColor: C.primary, borderRadius: 14,
-    paddingVertical: 20, alignItems: 'center',
+    paddingVertical: 24, alignItems: 'center',
   },
   primaryBtnPressed: { backgroundColor: C.primaryDark },
   primaryBtnDisabled: { backgroundColor: C.border },
-  primaryBtnText: { color: '#fff', fontSize: 20, fontWeight: '800', letterSpacing: 0.3 },
+  primaryBtnText: { color: '#fff', fontSize: 24, fontWeight: '800', letterSpacing: 0.3 },
   primaryBtnTextDisabled: { color: C.textMuted },
 
   switchUserBtn: {
-    marginTop: 24, paddingVertical: 12, alignItems: 'center',
+    marginTop: 28, paddingVertical: 14, alignItems: 'center',
   },
-  switchUserLabel: { color: C.textMuted, fontSize: 15, fontWeight: '500' },
-  switchUserLink: { color: C.primary, fontSize: 18, fontWeight: '700', marginTop: 4 },
+  switchUserLabel: { color: C.textMuted, fontSize: 18, fontWeight: '500' },
+  switchUserLink: { color: C.primary, fontSize: 22, fontWeight: '700', marginTop: 6 },
 
   errorBox: {
     marginTop: 16, padding: 14, borderRadius: 12,

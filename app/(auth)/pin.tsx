@@ -171,45 +171,45 @@ const s = StyleSheet.create({
 
   /* Direita — form */
   rightForm: {
-    flex: 1, paddingHorizontal: 40, paddingTop: 32, paddingBottom: 32,
+    flex: 1, paddingHorizontal: 48, paddingTop: 32, paddingBottom: 32,
     backgroundColor: C.bg,
   },
   backBtn: {
     alignSelf: 'flex-start',
-    paddingVertical: 8, paddingHorizontal: 14,
+    paddingVertical: 10, paddingHorizontal: 16,
     borderRadius: 10, backgroundColor: C.surface,
     borderWidth: 1, borderColor: C.border,
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  backText: { color: C.text, fontSize: 14, fontWeight: '600' },
+  backText: { color: C.text, fontSize: 16, fontWeight: '600' },
 
-  userBlock: { marginBottom: 20 },
-  greeting: { color: C.textMuted, fontSize: 16, fontWeight: '500', marginBottom: 4 },
-  userName: { color: C.text, fontSize: 26, fontWeight: '800', letterSpacing: -0.5, lineHeight: 32 },
-  userRole: { color: C.textMuted, fontSize: 13, fontWeight: '700', marginTop: 4, letterSpacing: 0.5 },
+  userBlock: { marginBottom: 24 },
+  greeting: { color: C.textMuted, fontSize: 20, fontWeight: '500', marginBottom: 6 },
+  userName: { color: C.text, fontSize: 36, fontWeight: '800', letterSpacing: -0.5, lineHeight: 42 },
+  userRole: { color: C.textMuted, fontSize: 17, fontWeight: '700', marginTop: 8, letterSpacing: 0.5 },
 
-  instructions: { color: C.textMuted, fontSize: 14, marginBottom: 16 },
+  instructions: { color: C.textMuted, fontSize: 18, marginBottom: 18, fontWeight: '500' },
 
-  pinDots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 8, height: 24, gap: 18 },
+  pinDots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 12, height: 28, gap: 20 },
   dot: {
-    width: 18, height: 18, borderRadius: 9,
+    width: 22, height: 22, borderRadius: 11,
     borderWidth: 2, borderColor: C.border,
     backgroundColor: C.bg,
   },
   dotFilled: { backgroundColor: C.primary, borderColor: C.primary },
 
-  feedbackArea: { height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  errorText: { color: C.danger, fontSize: 14, textAlign: 'center', fontWeight: '600' },
+  feedbackArea: { height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  errorText: { color: C.danger, fontSize: 15, textAlign: 'center', fontWeight: '600' },
 
-  pad: { alignSelf: 'center', marginTop: 'auto' },
-  padRow: { flexDirection: 'row', justifyContent: 'center', gap: 10, marginBottom: 10 },
+  pad: { alignSelf: 'center' },
+  padRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
   key: {
-    width: 78, height: 78, borderRadius: 14,
+    width: 92, height: 92, borderRadius: 16,
     backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
     alignItems: 'center', justifyContent: 'center',
   },
   keyPressed: { backgroundColor: C.border, transform: [{ scale: 0.96 }] },
-  keyTxt: { color: C.text, fontSize: 30, fontWeight: '600' },
+  keyTxt: { color: C.text, fontSize: 38, fontWeight: '600' },
   keyEmpty: { backgroundColor: 'transparent', borderWidth: 0 },
-  bsTxt: { color: C.text, fontSize: 24, fontWeight: '600' },
+  bsTxt: { color: C.text, fontSize: 32, fontWeight: '600' },
 });
