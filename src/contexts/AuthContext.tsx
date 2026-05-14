@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { apiFetch, API_URL } from '@/lib/api';
+import { authEvents } from '@/lib/auth-events';
 
 interface User {
   id: string;
@@ -79,6 +81,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch { /* ignora */ }
       finally { setLoading(false); }
     })();
+  }, []);
+
+  /* Escuta sessões terminadas pelo backend (device-conflict, expirado). */
+  useEffect(() => {
+    return authEvents.onSessionTerminated(async (reason, msg) => {
+      // limpa storage + state sem chamar /sessions/leave (token já é inválido)
+      await SecureStore.deleteItemAsync('access_token');
+      await SecureStore.deleteItemAsync('refresh_token');
+      await SecureStore.deleteItemAsync('user_data');
+      setUser(null);
+
+      if (reason === 'device-conflict') {
+        Alert.alert(
+          'Sessão encerrada',
+          msg ?? 'Você fez login em outro dispositivo. Para usar este tablet, entre novamente.',
+        );
+      }
+    });
   }, []);
 
   const setChamberSlug = useCallback(async (slug: string | null) => {

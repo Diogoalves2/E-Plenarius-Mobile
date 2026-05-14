@@ -4,9 +4,12 @@ import {
   Image, Vibration, Pressable,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { API_URL } from '@/lib/api';
+
+const LAST_USER_KEY = 'last_vereador_id';
 
 const API_BASE = API_URL.replace(/\/api$/, '');
 const PIN_LENGTH = 4;
@@ -45,6 +48,8 @@ export default function PinScreen() {
     setError(null);
     try {
       await loginWithPin(params.userId, pin);
+      // salva último usuário para próximo acesso rápido
+      await SecureStore.setItemAsync(LAST_USER_KEY, String(params.userId));
       // sucesso: RootGuard redireciona
     } catch (err: any) {
       Vibration.vibrate(300);

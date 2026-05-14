@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { authEvents } from './auth-events';
 
 export const API_URL = 'https://e-plenarius-backend.onrender.com/api';
 
@@ -32,6 +33,18 @@ export async function apiFetch<T = unknown>(
   }
 
   if (res.status === 401) {
+    // Captura mensagem do 401 inicial — backend retorna mensagem específica
+    // quando é device-conflict (mobileDevice mismatch).
+    const initialBody = await res.clone().json().catch(() => ({}));
+    const initialMsg: string = (initialBody as any)?.message ?? '';
+    const isDeviceConflict = /outro dispositivo|outro device|sessão encerrada/i.test(initialMsg);
+
+    if (isDeviceConflict) {
+      // Não adianta refresh — o backend já invalidou tudo. Sinaliza logout.
+      authEvents.emitSessionTerminated('device-conflict', initialMsg);
+      throw new Error(initialMsg);
+    }
+
     const refreshToken = await SecureStore.getItemAsync('refresh_token');
     if (refreshToken) {
       try {
@@ -46,11 +59,18 @@ export async function apiFetch<T = unknown>(
           await SecureStore.setItemAsync('refresh_token', newRefresh);
           headers['Authorization'] = `Bearer ${accessToken}`;
           const retry = await fetchWithTimeout(`${API_URL}${path}`, { ...options, headers });
-          if (!retry.ok) throw new Error(`HTTP ${retry.status}`);
+          if (!retry.ok) {
+            const retryBody = await retry.json().catch(() => ({}));
+            throw new Error((retryBody as any)?.message || `HTTP ${retry.status}`);
+          }
+          if (retry.status === 204) return undefined as T;
           return retry.json() as Promise<T>;
         }
-      } catch {}
+      } catch { /* fallthrough */ }
     }
+
+    // Refresh falhou: sessão expirou ou foi revogada (outro device logou).
+    authEvents.emitSessionTerminated('expired', initialMsg || 'Sua sessão expirou.');
     throw new Error('UNAUTHORIZED');
   }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  useWindowDimensions, ScrollView, Alert, Image,
+  useWindowDimensions, ScrollView, Alert, Image, Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -118,12 +118,12 @@ export default function HomeScreen() {
     connText: { fontSize: 16, fontWeight: '600' },
     divider: { height: 1, backgroundColor: C.border },
     leaveSessionBtn: {
-      borderRadius: 14, paddingVertical: 14,
-      backgroundColor: 'rgba(239,68,68,0.1)',
-      borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
+      borderRadius: 14, paddingVertical: 16,
+      backgroundColor: '#DC2626',
       alignItems: 'center',
     },
-    leaveSessionText: { color: C.danger, fontSize: 16, fontWeight: '700' },
+    leaveSessionBtnPressed: { backgroundColor: '#B91C1C' },
+    leaveSessionText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.2 },
     /* Cards */
     card: {
       flex: 1, backgroundColor: C.card, borderRadius: 20,
@@ -191,13 +191,12 @@ export default function HomeScreen() {
   }
 
   const leaveBtn = (
-    <TouchableOpacity
-      style={s.leaveSessionBtn}
+    <Pressable
       onPress={session ? handleLeaveSession : handleLogout}
-      activeOpacity={0.8}
+      style={({ pressed }) => [s.leaveSessionBtn, pressed && s.leaveSessionBtnPressed]}
     >
       <Text style={s.leaveSessionText}>{session ? 'Sair da Sessão' : 'Sair'}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 
   const userCard = isLandscape ? (

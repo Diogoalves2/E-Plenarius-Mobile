@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  useWindowDimensions, Alert,
+  useWindowDimensions, Alert, Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -76,12 +76,14 @@ export default function PresidenteHomeScreen() {
     connDot: { width: 9, height: 9, borderRadius: 5 },
     connText: { fontSize: 16, fontWeight: '600' },
     logoutBtn: {
-      borderRadius: 14, paddingVertical: 14,
-      backgroundColor: 'rgba(239,68,68,0.1)',
-      borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)',
-      alignItems: 'center',
+      borderRadius: 14,
+      paddingVertical: 18, paddingHorizontal: 24,
+      backgroundColor: '#DC2626',
+      alignItems: 'center', alignSelf: 'stretch',
+      marginTop: 4,
     },
-    logoutText: { color: C.danger, fontSize: 16, fontWeight: '700' },
+    logoutBtnPressed: { backgroundColor: '#B91C1C' },
+    logoutText: { color: '#fff', fontSize: 17, fontWeight: '700', letterSpacing: 0.2 },
     divider: { height: 1, backgroundColor: C.border },
     card: {
       flex: 1, backgroundColor: C.card, borderRadius: 20,
@@ -113,9 +115,12 @@ export default function PresidenteHomeScreen() {
   }
 
   const logoutBtn = (
-    <TouchableOpacity style={s.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+    <Pressable
+      onPress={handleLogout}
+      style={({ pressed }) => [s.logoutBtn, pressed && s.logoutBtnPressed]}
+    >
       <Text style={s.logoutText}>Sair</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 
   const PANEL_INNER = 264;
