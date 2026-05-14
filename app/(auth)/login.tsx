@@ -313,17 +313,17 @@ const s = StyleSheet.create({
     backgroundColor: C.bg,
   },
   chamberHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 16,
+    flexDirection: 'column', alignItems: 'center', gap: 16,
     paddingBottom: 28, marginBottom: 32,
     borderBottomWidth: 1, borderBottomColor: C.border,
   },
-  chamberLogo: { width: 68, height: 68 },
+  chamberLogo: { width: 88, height: 88 },
   chamberLogoFallback: {
-    width: 68, height: 68, borderRadius: 16,
+    width: 88, height: 88, borderRadius: 20,
     backgroundColor: C.primary + '15', alignItems: 'center', justifyContent: 'center',
   },
-  chamberLogoFallbackText: { fontSize: 34, color: C.primary },
-  chamberName: { flex: 1, color: C.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.6, lineHeight: 34 },
+  chamberLogoFallbackText: { fontSize: 44, color: C.primary },
+  chamberName: { color: C.text, fontSize: 36, fontWeight: '800', letterSpacing: -0.8, lineHeight: 42, textAlign: 'center' },
 
   userBlock: { marginBottom: 32 },
   greeting: { color: C.textMuted, fontSize: 20, fontWeight: '500', marginBottom: 6 },
