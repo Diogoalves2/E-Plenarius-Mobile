@@ -59,24 +59,24 @@ export default function PresidenteHomeScreen() {
     userParty: { color: C.warning, fontSize: 17, fontWeight: '600' },
     roleBadge: {
       backgroundColor: C.warning + '20', alignSelf: 'flex-start',
-      borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6,
+      borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6,
       borderWidth: 1, borderColor: C.warning + '40',
     },
     roleText: { color: C.warning, fontSize: 15, fontWeight: '700' },
     sessionStatus: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
-      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
     },
     sessionDot: { width: 9, height: 9, borderRadius: 5 },
     sessionStatusText: { fontSize: 16, fontWeight: '600' },
     connBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
-      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
     },
     connDot: { width: 9, height: 9, borderRadius: 5 },
     connText: { fontSize: 16, fontWeight: '600' },
     logoutBtn: {
-      borderRadius: 14,
+      borderRadius: 8,
       paddingVertical: 18, paddingHorizontal: 24,
       backgroundColor: '#DC2626',
       alignItems: 'center', alignSelf: 'stretch',
@@ -86,17 +86,19 @@ export default function PresidenteHomeScreen() {
     logoutText: { color: '#fff', fontSize: 17, fontWeight: '700', letterSpacing: 0.2 },
     divider: { height: 1, backgroundColor: C.border },
     card: {
-      flex: 1, backgroundColor: C.card, borderRadius: 20,
+      flex: 1, backgroundColor: C.card, borderRadius: 8,
       borderWidth: 1, overflow: 'hidden', position: 'relative', flexDirection: 'column',
     },
-    cardIconWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
-    cardEmoji: { fontSize: 48 },
-    cardBody: { paddingHorizontal: 14, paddingBottom: 20, paddingTop: 10, gap: 6, alignItems: 'center' },
-    cardTitle: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
-    cardDesc: { color: C.textMuted, fontSize: 16, lineHeight: 22, textAlign: 'center' },
+    cardIconWrap: { flex: 1.4, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
+    cardEmoji: { fontSize: 56 },
+    cardBody: {
+      flex: 1, paddingHorizontal: 14, paddingVertical: 16,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    cardTitle: { fontSize: 30, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
     liveBadge: {
       position: 'absolute', top: 8, right: 8,
-      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, zIndex: 1,
+      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 1,
     },
     liveText: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
   }), [C]);
@@ -197,7 +199,6 @@ export default function PresidenteHomeScreen() {
                   <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2}>
                     {card.title}
                   </Text>
-                  <Text style={s.cardDesc} numberOfLines={2}>{card.desc}</Text>
                 </View>
               </TouchableOpacity>
             );

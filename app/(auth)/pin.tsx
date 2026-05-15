@@ -177,7 +177,7 @@ const s = StyleSheet.create({
   backBtn: {
     alignSelf: 'flex-start',
     paddingVertical: 10, paddingHorizontal: 16,
-    borderRadius: 10, backgroundColor: C.surface,
+    borderRadius: 6, backgroundColor: C.surface,
     borderWidth: 1, borderColor: C.border,
     marginBottom: 20,
   },
@@ -204,7 +204,7 @@ const s = StyleSheet.create({
   pad: { alignSelf: 'center' },
   padRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 12 },
   key: {
-    width: 92, height: 92, borderRadius: 16,
+    width: 92, height: 92, borderRadius: 8,
     backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
     alignItems: 'center', justifyContent: 'center',
   },

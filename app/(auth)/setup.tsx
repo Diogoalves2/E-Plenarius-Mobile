@@ -32,7 +32,7 @@ export default function SetupScreen() {
     inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 40 },
     logoWrap: { alignItems: 'center', marginBottom: 48 },
     logo: {
-      width: 88, height: 88, borderRadius: 22,
+      width: 88, height: 88, borderRadius: 8,
       backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center',
       marginBottom: 16,
     },
@@ -41,7 +41,7 @@ export default function SetupScreen() {
     sub: { color: C.textMuted, fontSize: 15, marginTop: 8, textAlign: 'center', lineHeight: 22 },
     form: {
       backgroundColor: C.card,
-      borderRadius: 20, padding: 24,
+      borderRadius: 8, padding: 24,
       borderWidth: 1, borderColor: C.border,
     },
     label: {
@@ -49,19 +49,19 @@ export default function SetupScreen() {
       fontWeight: '700', letterSpacing: 1.2, marginBottom: 8,
     },
     input: {
-      backgroundColor: C.surface, borderRadius: 12,
+      backgroundColor: C.surface, borderRadius: 6,
       borderWidth: 1, borderColor: C.border,
       paddingHorizontal: 18, paddingVertical: 16,
       color: C.text, fontSize: 17,
     },
     hint: { color: C.textMuted, fontSize: 12, marginTop: 8, lineHeight: 18 },
     btn: {
-      marginTop: 28, backgroundColor: C.primary, borderRadius: 14,
+      marginTop: 28, backgroundColor: C.primary, borderRadius: 8,
       paddingVertical: 17, alignItems: 'center',
     },
     btnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
     confirmBox: {
-      marginTop: 18, padding: 16, borderRadius: 12,
+      marginTop: 18, padding: 16, borderRadius: 8,
       backgroundColor: C.successBg, borderWidth: 1, borderColor: C.successBorder,
     },
     confirmText: { color: C.successText, fontSize: 14, fontWeight: '600' },

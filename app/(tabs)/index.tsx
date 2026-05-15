@@ -86,39 +86,39 @@ export default function HomeScreen() {
     userParty: { color: C.primary, fontSize: 17, fontWeight: '600' },
     roleBadge: {
       backgroundColor: C.primary + '20', alignSelf: 'flex-start',
-      borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6,
+      borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6,
       borderWidth: 1, borderColor: C.primary + '40',
     },
     roleText: { color: C.primary, fontSize: 15, fontWeight: '700' },
     sessionBlock: {
-      backgroundColor: C.card, borderRadius: 14,
+      backgroundColor: C.card, borderRadius: 8,
       borderWidth: 1, borderColor: C.success + '30', padding: 12, gap: 8,
     },
     chamberRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     chamberLogo: {
-      width: 40, height: 40, borderRadius: 20,
+      width: 40, height: 40, borderRadius: 8,
       backgroundColor: C.success + '18', borderWidth: 1, borderColor: C.success + '50',
       alignItems: 'center', justifyContent: 'center', flexShrink: 0,
     },
-    chamberLogoImg: { width: 40, height: 40, borderRadius: 20, flexShrink: 0 },
+    chamberLogoImg: { width: 40, height: 40, borderRadius: 8, flexShrink: 0 },
     chamberLogoStar: { fontSize: 20, color: C.success },
     chamberName: { color: C.text, fontSize: 15, fontWeight: '700', flex: 1, lineHeight: 20, textTransform: 'uppercase' },
     sessionFullTitle: { color: C.success, fontSize: 15, fontWeight: '600', lineHeight: 21, textTransform: 'uppercase' },
     sessionStatus: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
-      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
     },
     sessionDot: { width: 9, height: 9, borderRadius: 5 },
     sessionStatusText: { fontSize: 16, fontWeight: '600' },
     connBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
-      borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
     },
     connDot: { width: 9, height: 9, borderRadius: 5 },
     connText: { fontSize: 16, fontWeight: '600' },
     divider: { height: 1, backgroundColor: C.border },
     leaveSessionBtn: {
-      borderRadius: 14, paddingVertical: 16,
+      borderRadius: 8, paddingVertical: 16,
       backgroundColor: '#DC2626',
       alignItems: 'center',
     },
@@ -126,20 +126,19 @@ export default function HomeScreen() {
     leaveSessionText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.2 },
     /* Cards */
     card: {
-      flex: 1, backgroundColor: C.card, borderRadius: 20,
+      flex: 1, backgroundColor: C.card, borderRadius: 8,
       borderWidth: 1, overflow: 'hidden', position: 'relative', flexDirection: 'column',
     },
-    cardIconWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
-    cardEmoji: { fontSize: 48 },
+    cardIconWrap: { flex: 1.4, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
+    cardEmoji: { fontSize: 56 },
     cardBody: {
-      paddingHorizontal: 14, paddingBottom: 18, paddingTop: 10,
-      gap: 4, alignItems: 'center',
+      flex: 1, paddingHorizontal: 14, paddingVertical: 16,
+      alignItems: 'center', justifyContent: 'center',
     },
-    cardTitle: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
-    cardDesc: { color: C.textMuted, fontSize: 16, lineHeight: 22, textAlign: 'center' },
+    cardTitle: { fontSize: 30, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
     liveBadge: {
       position: 'absolute', top: 8, right: 8,
-      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, zIndex: 1,
+      paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 1,
     },
     liveText: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
   }), [C]);
@@ -263,7 +262,6 @@ export default function HomeScreen() {
                   <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2}>
                     {card.title}
                   </Text>
-                  <Text style={s.cardDesc} numberOfLines={2}>{card.desc}</Text>
                 </View>
               </TouchableOpacity>
             );

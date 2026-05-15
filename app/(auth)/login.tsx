@@ -319,7 +319,7 @@ const s = StyleSheet.create({
   },
   chamberLogo: { width: 88, height: 88 },
   chamberLogoFallback: {
-    width: 88, height: 88, borderRadius: 20,
+    width: 88, height: 88, borderRadius: 8,
     backgroundColor: C.primary + '15', alignItems: 'center', justifyContent: 'center',
   },
   chamberLogoFallbackText: { fontSize: 44, color: C.primary },
@@ -333,14 +333,14 @@ const s = StyleSheet.create({
   warningBox: {
     flexDirection: 'row', gap: 14, alignItems: 'flex-start',
     backgroundColor: C.warningBg, borderWidth: 1, borderColor: C.warningBorder,
-    padding: 18, borderRadius: 14, marginBottom: 28,
+    padding: 18, borderRadius: 8, marginBottom: 28,
   },
   warningIcon: { fontSize: 26 },
   warningTitle: { color: C.warningText, fontSize: 18, fontWeight: '700' },
   warningText: { color: C.warningText, fontSize: 15, marginTop: 6, lineHeight: 21 },
 
   primaryBtn: {
-    backgroundColor: C.primary, borderRadius: 14,
+    backgroundColor: C.primary, borderRadius: 8,
     paddingVertical: 24, alignItems: 'center',
   },
   primaryBtnPressed: { backgroundColor: C.primaryDark },
@@ -355,7 +355,7 @@ const s = StyleSheet.create({
   switchUserLink: { color: C.primary, fontSize: 22, fontWeight: '700', marginTop: 6 },
 
   errorBox: {
-    marginTop: 16, padding: 14, borderRadius: 12,
+    marginTop: 16, padding: 14, borderRadius: 8,
     backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA',
   },
   errorText: { color: C.danger, fontSize: 13, lineHeight: 19 },
@@ -372,7 +372,7 @@ const s = StyleSheet.create({
   grid: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 12 },
   card: {
     flex: 1, margin: 8, backgroundColor: C.card,
-    borderRadius: 18, borderWidth: 1, borderColor: C.border,
+    borderRadius: 8, borderWidth: 1, borderColor: C.border,
     padding: 18, alignItems: 'center',
     minHeight: 180,
   },
