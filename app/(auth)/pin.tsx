@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, ActivityIndicator,
-  Image, Vibration, Pressable,
+  Image, Vibration, Pressable, useWindowDimensions, ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -26,6 +26,8 @@ const C = {
 };
 
 export default function PinScreen() {
+  const { width } = useWindowDimensions();
+  const isPhone = width < 700;
   const router = useRouter();
   const { loginWithPin } = useAuth();
   const params = useLocalSearchParams<{
@@ -73,30 +75,30 @@ export default function PinScreen() {
   const avatarUri = params.avatarUrl ? `${API_BASE}${params.avatarUrl}` : null;
 
   return (
-    <View style={s.root}>
-      <View style={s.splitContainer}>
-        {/* ── ESQUERDA — Foto do vereador ── */}
-        <View style={s.leftPhotoWrap}>
+    <ScrollView style={s.root} contentContainerStyle={isPhone ? { flexGrow: 1 } : undefined}>
+      <View style={[s.splitContainer, isPhone && s.splitPhone]}>
+        {/* ── Foto do vereador ── */}
+        <View style={[s.leftPhotoWrap, isPhone && s.leftPhotoPhone]}>
           {avatarUri ? (
             <Image source={{ uri: avatarUri }} style={s.leftPhoto} resizeMode="cover" />
           ) : (
             <View style={[s.leftPhoto, s.leftPhotoFallback]}>
-              <Text style={s.leftPhotoInitials}>
+              <Text style={[s.leftPhotoInitials, isPhone && { fontSize: 64 }]}>
                 {params.initials || (params.name ?? '').slice(0, 2).toUpperCase()}
               </Text>
             </View>
           )}
         </View>
 
-        {/* ── DIREITA — PIN ── */}
-        <View style={s.rightForm}>
+        {/* ── PIN ── */}
+        <View style={[s.rightForm, isPhone && s.rightFormPhone]}>
           <Pressable onPress={() => router.back()} style={s.backBtn}>
             <Text style={s.backText}>← Voltar</Text>
           </Pressable>
 
-          <View style={s.userBlock}>
+          <View style={[s.userBlock, isPhone && { marginBottom: 12 }]}>
             <Text style={s.greeting}>Olá,</Text>
-            <Text style={s.userName} numberOfLines={2}>{params.name}</Text>
+            <Text style={[s.userName, isPhone && { fontSize: 24, lineHeight: 28 }]} numberOfLines={2}>{params.name}</Text>
             {params.title ? (
               <Text style={s.userRole}>
                 {params.title.toUpperCase()}{params.party ? ` · ${params.party}` : ''}
@@ -104,7 +106,7 @@ export default function PinScreen() {
             ) : null}
           </View>
 
-          <Text style={s.instructions}>Digite seu PIN de {PIN_LENGTH} dígitos</Text>
+          <Text style={[s.instructions, isPhone && { fontSize: 14, marginBottom: 12 }]}>Digite seu PIN de {PIN_LENGTH} dígitos</Text>
 
           <View style={s.pinDots} key={shake}>
             {Array.from({ length: PIN_LENGTH }).map((_, i) => (
@@ -127,8 +129,8 @@ export default function PinScreen() {
                 {row.map(d => (
                   <Pressable key={d} onPress={() => appendDigit(d)} disabled={loading}>
                     {({ pressed }) => (
-                      <View style={[s.key, pressed && s.keyPressed]}>
-                        <Text style={s.keyTxt}>{d}</Text>
+                      <View style={[s.key, isPhone && { width: 68, height: 68 }, pressed && s.keyPressed]}>
+                        <Text style={[s.keyTxt, isPhone && { fontSize: 28 }]}>{d}</Text>
                       </View>
                     )}
                   </Pressable>
@@ -136,18 +138,18 @@ export default function PinScreen() {
               </View>
             ))}
             <View style={s.padRow}>
-              <View style={[s.key, s.keyEmpty]} />
+              <View style={[s.key, s.keyEmpty, isPhone && { width: 68, height: 68 }]} />
               <Pressable onPress={() => appendDigit('0')} disabled={loading}>
                 {({ pressed }) => (
-                  <View style={[s.key, pressed && s.keyPressed]}>
-                    <Text style={s.keyTxt}>0</Text>
+                  <View style={[s.key, isPhone && { width: 68, height: 68 }, pressed && s.keyPressed]}>
+                    <Text style={[s.keyTxt, isPhone && { fontSize: 28 }]}>0</Text>
                   </View>
                 )}
               </Pressable>
               <Pressable onPress={backspace} disabled={loading || pin.length === 0}>
                 {({ pressed }) => (
-                  <View style={[s.key, pressed && s.keyPressed, pin.length === 0 && { opacity: 0.3 }]}>
-                    <Text style={s.bsTxt}>⌫</Text>
+                  <View style={[s.key, isPhone && { width: 68, height: 68 }, pressed && s.keyPressed, pin.length === 0 && { opacity: 0.3 }]}>
+                    <Text style={[s.bsTxt, isPhone && { fontSize: 24 }]}>⌫</Text>
                   </View>
                 )}
               </Pressable>
@@ -155,13 +157,16 @@ export default function PinScreen() {
           </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   splitContainer: { flex: 1, flexDirection: 'row' },
+  splitPhone: { flexDirection: 'column' },
+  leftPhotoPhone: { flex: 0, height: 220, width: '100%' },
+  rightFormPhone: { flex: 0, paddingHorizontal: 24, paddingTop: 20, paddingBottom: 24 },
 
   /* Esquerda — foto */
   leftPhotoWrap: { flex: 1, backgroundColor: C.surface, overflow: 'hidden' },

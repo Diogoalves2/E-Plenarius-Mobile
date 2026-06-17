@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator,
-  Image, RefreshControl, Pressable,
+  Image, RefreshControl, Pressable, useWindowDimensions, ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -48,6 +48,9 @@ const C = {
 };
 
 export default function LoginGridScreen() {
+  const { width, height } = useWindowDimensions();
+  const isPhone = width < 700;
+  const isLandscape = width > height;
   const router = useRouter();
   const { chamberSlug, setChamberSlug } = useAuth();
   const [vereadores, setVereadores] = useState<Vereador[]>([]);
@@ -132,15 +135,15 @@ export default function LoginGridScreen() {
     const showNoSessionWarn = lastUser.role !== 'presidente' && chamber && !chamber.hasActiveSession;
 
     return (
-      <View style={s.root}>
-        <View style={s.splitContainer}>
-          {/* ── ESQUERDA — Foto do vereador, altura total ── */}
-          <View style={s.leftPhotoWrap}>
+      <ScrollView style={s.root} contentContainerStyle={isPhone ? { flexGrow: 1 } : undefined}>
+        <View style={[s.splitContainer, isPhone && s.splitPhone]}>
+          {/* ── Foto do vereador ── */}
+          <View style={[s.leftPhotoWrap, isPhone && s.leftPhotoPhone]}>
             {avatarUri ? (
               <Image source={{ uri: avatarUri }} style={s.leftPhoto} resizeMode="cover" />
             ) : (
               <View style={[s.leftPhoto, s.leftPhotoFallback]}>
-                <Text style={s.leftPhotoInitials}>
+                <Text style={[s.leftPhotoInitials, isPhone && { fontSize: 80 }]}>
                   {lastUser.initials || lastUser.name.slice(0, 2).toUpperCase()}
                 </Text>
               </View>
@@ -148,8 +151,8 @@ export default function LoginGridScreen() {
             <View style={s.leftPhotoOverlay} />
           </View>
 
-          {/* ── DIREITA — Formulário ── */}
-          <View style={s.rightForm}>
+          {/* ── Formulário ── */}
+          <View style={[s.rightForm, isPhone && s.rightFormPhone]}>
             {/* Topo: logo + nome da câmara */}
             <View style={s.chamberHeader}>
               {chamber?.logoUrl ? (
@@ -159,13 +162,13 @@ export default function LoginGridScreen() {
                   <Text style={s.chamberLogoFallbackText}>⚖</Text>
                 </View>
               )}
-              <Text style={s.chamberName} numberOfLines={2}>{chamber?.name ?? 'E-Plenarius'}</Text>
+              <Text style={[s.chamberName, isPhone && { fontSize: 24, lineHeight: 28 }]} numberOfLines={2}>{chamber?.name ?? 'E-Plenarius'}</Text>
             </View>
 
             {/* Vereador info */}
-            <View style={s.userBlock}>
+            <View style={[s.userBlock, isPhone && { marginBottom: 20 }]}>
               <Text style={s.greeting}>Olá,</Text>
-              <Text style={s.userName} numberOfLines={2}>{lastUser.name}</Text>
+              <Text style={[s.userName, isPhone && { fontSize: 28, lineHeight: 32 }]} numberOfLines={2}>{lastUser.name}</Text>
               {lastUser.title ? (
                 <Text style={s.userRole}>
                   {lastUser.title.toUpperCase()}{lastUser.party ? ` · ${lastUser.party}` : ''}
@@ -254,7 +257,8 @@ export default function LoginGridScreen() {
 
       <FlatList
         data={vereadores}
-        numColumns={2}
+        numColumns={isPhone ? 1 : 2}
+        key={isPhone ? 'p1' : 'p2'}
         keyExtractor={v => v.id}
         contentContainerStyle={s.grid}
         refreshControl={<RefreshControl refreshing={false} onRefresh={loadData} tintColor={C.primary} />}
@@ -299,6 +303,9 @@ const s = StyleSheet.create({
 
   /* ── Layout split (foto esquerda + form direita) ── */
   splitContainer: { flex: 1, flexDirection: 'row' },
+  splitPhone: { flexDirection: 'column' },
+  leftPhotoPhone: { flex: 0, height: 280, width: '100%' },
+  rightFormPhone: { flex: 0, padding: 24, paddingTop: 24 },
   leftPhotoWrap: { flex: 1, backgroundColor: C.surface, overflow: 'hidden' },
   leftPhoto: { width: '100%', height: '100%' },
   leftPhotoFallback: { alignItems: 'center', justifyContent: 'center', backgroundColor: C.primary },
