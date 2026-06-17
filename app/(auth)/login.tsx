@@ -220,7 +220,7 @@ export default function LoginGridScreen() {
             )}
           </View>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
