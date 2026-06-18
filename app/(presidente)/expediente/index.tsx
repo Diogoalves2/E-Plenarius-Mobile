@@ -226,10 +226,10 @@ export default function PresidenteExpedienteScreen() {
     try {
       const [lista, ativoData] = await Promise.all([
         apiFetch<Inscricao[]>(`/expediente/sessions/${sessionId}/inscritos`),
-        apiFetch<ExpedienteAtivo | null>(`/expediente/sessions/${sessionId}/ativo`).catch(() => null),
+        apiFetch<any>(`/expediente/sessions/${sessionId}/ativo`).catch(() => null),
       ]);
       setInscricoes(lista);
-      if (ativoData) setAtivo(ativoData);
+      if (ativoData && (ativoData.inscricaoId || ativoData.vereador)) setAtivo(ativoData);
       else setAtivo(null);
     } catch {}
   }, []);
