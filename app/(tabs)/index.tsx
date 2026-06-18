@@ -161,6 +161,14 @@ export default function HomeScreen() {
       flexShrink: 1, flexGrow: 1, minWidth: 0,
     },
     phoneStatusText: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
+    phoneOnlineDot: { width: 7, height: 7, borderRadius: 4, marginLeft: 4 },
+    phoneOnlineText: { fontSize: 11, fontWeight: '700' },
+    phoneSessionPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6,
+      marginTop: 10,
+    },
+    phoneSessionText: { fontSize: 13, fontWeight: '700', flex: 1 },
   }), [C]);
 
   useEffect(() => {
@@ -237,29 +245,18 @@ export default function HomeScreen() {
               <View style={s.phoneRoleBadge}>
                 <Text style={s.phoneRoleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
               </View>
+              <View style={[s.phoneOnlineDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+              <Text style={[s.phoneOnlineText, { color: connected ? C.primary : C.textMuted }]}>
+                {connected ? 'Online' : 'Offline'}
+              </Text>
             </View>
           </View>
         </View>
-        <View style={s.phoneStatusRow}>
-          {session ? (
-            <View style={[s.phoneStatusPill, { borderColor: C.success + '40', backgroundColor: C.success + '10', flex: 2 }]}>
-              <View style={[s.sessionDot, { backgroundColor: C.success }]} />
-              <Text style={[s.phoneStatusText, { color: C.success }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
-                {sessionTitle(session.number, session.type, chamber)}
-              </Text>
-            </View>
-          ) : (
-            <View style={[s.phoneStatusPill, { borderColor: C.border, flex: 2 }]}>
-              <View style={[s.sessionDot, { backgroundColor: C.textMuted }]} />
-              <Text style={[s.phoneStatusText, { color: C.textMuted }]}>Sem sessão</Text>
-            </View>
-          )}
-          <View style={[s.phoneStatusPill, { borderColor: connected ? C.primary + '40' : C.border, backgroundColor: (connected ? C.primary : C.textMuted) + '10' }]}>
-            <View style={[s.sessionDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
-            <Text style={[s.phoneStatusText, { color: connected ? C.primary : C.textMuted }]} numberOfLines={1}>
-              {connected ? 'Online' : 'Offline'}
-            </Text>
-          </View>
+        <View style={[s.phoneSessionPill, { borderColor: session ? C.success + '40' : C.border, backgroundColor: (session ? C.success : C.textMuted) + '10' }]}>
+          <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
+          <Text style={[s.phoneSessionText, { color: session ? C.success : C.textMuted }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
+            {session ? sessionTitle(session.number, session.type, chamber) : 'Sem sessão'}
+          </Text>
         </View>
       </View>
     );

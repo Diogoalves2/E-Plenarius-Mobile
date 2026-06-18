@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   useWindowDimensions, Alert, Pressable, ScrollView,
@@ -19,6 +19,24 @@ const ROLE_LABEL: Record<string, string> = {
   superadmin: 'Super Admin',
 };
 
+const TYPE_LABEL: Record<string, string> = {
+  ordinaria: 'Ordinária', extraordinaria: 'Extraordinária',
+  solene: 'Solene', especial: 'Especial',
+};
+
+interface Chamber {
+  id: string; name: string;
+  bienioInicio: number | null; bienioFim: number | null; anoBienio: number | null;
+}
+
+function sessionTitle(number: number, type: string, ch: Chamber | null): string {
+  const tipo = TYPE_LABEL[type] ?? type;
+  const base = `${number}ª Sessão ${tipo}`;
+  if (!ch?.bienioInicio || !ch?.bienioFim || !ch?.anoBienio) return base;
+  const ord = ch.anoBienio === 1 ? '1º' : '2º';
+  return `${base} do ${ord} Ano do Biênio ${ch.bienioInicio}–${ch.bienioFim}`;
+}
+
 interface NavCard { route: string; emoji: string; title: string; desc: string; color: string; liveKey?: 'voting'; }
 
 const COLS = 2;
@@ -32,6 +50,12 @@ export default function PresidenteHomeScreen() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isPhone = Math.min(width, height) < 600;
+  const [chamber, setChamber] = useState<Chamber | null>(null);
+
+  useEffect(() => {
+    if (!user?.chamberId) return;
+    apiFetch<Chamber>(`/chambers/${user.chamberId}`).then(c => setChamber(c)).catch(() => {});
+  }, [user?.chamberId]);
 
   const CARDS = useMemo<NavCard[]>(() => [
     { route: 'controle',   emoji: '🎛️', title: 'Controle de Votação', desc: 'Abrir e fechar votações',   color: C.warning, liveKey: 'voting' },
@@ -121,6 +145,14 @@ export default function PresidenteHomeScreen() {
       flexShrink: 1, flexGrow: 1, minWidth: 0,
     },
     phoneStatusText: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
+    phoneOnlineDot: { width: 7, height: 7, borderRadius: 4, marginLeft: 4 },
+    phoneOnlineText: { fontSize: 11, fontWeight: '700' },
+    phoneSessionPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6,
+      marginTop: 10,
+    },
+    phoneSessionText: { fontSize: 13, fontWeight: '700', flex: 1 },
   }), [C]);
 
   useEffect(() => {
@@ -153,13 +185,11 @@ export default function PresidenteHomeScreen() {
 
   const PANEL_INNER = 264;
 
-  const sessionLabel = session
-    ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}`
-    : 'Sem sessão';
+  const sessionLabel = session ? sessionTitle(session.number, session.type, chamber) : 'Sem sessão';
 
   let userCard: React.ReactNode;
   if (isPhone) {
-    // Phone (port + land): compacto horizontal, avatar circular pequeno
+    // Phone: avatar + nome compacto; metaRow tem party/role/online; sessao linha cheia abaixo
     userCard = (
       <View>
         <View style={s.phoneHeader}>
@@ -171,22 +201,18 @@ export default function PresidenteHomeScreen() {
               <View style={s.phoneRoleBadge}>
                 <Text style={s.phoneRoleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
               </View>
+              <View style={[s.phoneOnlineDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+              <Text style={[s.phoneOnlineText, { color: connected ? C.primary : C.textMuted }]}>
+                {connected ? 'Online' : 'Offline'}
+              </Text>
             </View>
           </View>
         </View>
-        <View style={s.phoneStatusRow}>
-          <View style={[s.phoneStatusPill, { borderColor: session ? C.success + '40' : C.border, backgroundColor: (session ? C.success : C.textMuted) + '10' }]}>
-            <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
-            <Text style={[s.phoneStatusText, { color: session ? C.success : C.textMuted }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-              {sessionLabel}
-            </Text>
-          </View>
-          <View style={[s.phoneStatusPill, { borderColor: connected ? C.primary + '40' : C.border, backgroundColor: (connected ? C.primary : C.textMuted) + '10' }]}>
-            <View style={[s.sessionDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
-            <Text style={[s.phoneStatusText, { color: connected ? C.primary : C.textMuted }]} numberOfLines={1}>
-              {connected ? 'Online' : 'Offline'}
-            </Text>
-          </View>
+        <View style={[s.phoneSessionPill, { borderColor: session ? C.success + '40' : C.border, backgroundColor: (session ? C.success : C.textMuted) + '10' }]}>
+          <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
+          <Text style={[s.phoneSessionText, { color: session ? C.success : C.textMuted }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
+            {sessionLabel}
+          </Text>
         </View>
       </View>
     );
