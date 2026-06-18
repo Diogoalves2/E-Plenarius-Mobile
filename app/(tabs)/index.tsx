@@ -172,6 +172,12 @@ export default function HomeScreen() {
     if (votingOpen) router.push('/(tabs)/votacao' as any);
   }, [votingOpen]);
 
+  // Auto-confirma presença na sessão ativa ao entrar no app
+  useEffect(() => {
+    if (!session?.id) return;
+    apiFetch(`/sessions/${session.id}/presence`, { method: 'POST' }).catch(() => {});
+  }, [session?.id]);
+
   function go(route: string) { router.push(`/(tabs)/${route}` as any); }
 
   function handleLeaveSession() {
