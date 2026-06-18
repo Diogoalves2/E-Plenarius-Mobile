@@ -37,6 +37,7 @@ export default function ExpedienteScreen() {
   const { colors: C } = useTheme();
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
   const [ativo, setAtivo] = useState<ExpedienteAtivo | null>(null);
+  const [inscricoesAbertas, setInscricoesAbertas] = useState<{ grande: boolean; pequeno: boolean }>({ grande: false, pequeno: false });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -101,10 +102,12 @@ export default function ExpedienteScreen() {
     try {
       const [lista, ativoData] = await Promise.all([
         apiFetch<Inscricao[]>(`/expediente/sessions/${sessionId}/inscritos`),
-        apiFetch<ExpedienteAtivo | null>(`/expediente/sessions/${sessionId}/ativo`).catch(() => null),
+        apiFetch<any>(`/expediente/sessions/${sessionId}/ativo`).catch(() => null),
       ]);
       setInscricoes(lista);
-      if (ativoData) setAtivo(ativoData);
+      if (ativoData?.inscricoesAbertas) setInscricoesAbertas(ativoData.inscricoesAbertas);
+      if (ativoData && (ativoData.inscricaoId || ativoData.vereador)) setAtivo(ativoData);
+      else setAtivo(null);
     } catch {} finally {
       setLoading(false);
     }
@@ -130,6 +133,9 @@ export default function ExpedienteScreen() {
         setAtivo(prev => prev ? { ...prev, tempoRestante: data.tempoRestante } : null);
       });
       socket.on('expediente:encerrado', () => { setAtivo(null); loadData(session.id); });
+      socket.on('expediente:inscricoes_status', (data: { tipo: 'grande' | 'pequeno'; aberta: boolean }) => {
+        setInscricoesAbertas(prev => ({ ...prev, [data.tipo]: data.aberta }));
+      });
     })();
     return () => { socketRef.current?.disconnect(); socketRef.current = null; };
   }, [session?.id]);
@@ -228,13 +234,13 @@ export default function ExpedienteScreen() {
           <View style={st.sectionsRow}>
             <ExpedienteSection
               tipo="grande" titulo="Grande Expediente" duracao="10 minutos" emoji="🎤" color={C.primary}
-              lista={grandeList} inscrito={!!minhaGrande} submitting={submitting}
+              lista={grandeList} inscrito={!!minhaGrande} submitting={submitting} aberta={inscricoesAbertas.grande}
               onInscrever={() => inscrever('grande')} onCancelar={() => cancelar('grande')}
               userId={user?.id ?? ''} flex C={C} st={st}
             />
             <ExpedienteSection
               tipo="pequeno" titulo="Pequeno Expediente" duracao="5 minutos" emoji="🗣️" color="#8B5CF6"
-              lista={pequenoList} inscrito={!!minhaPequeno} submitting={submitting}
+              lista={pequenoList} inscrito={!!minhaPequeno} submitting={submitting} aberta={inscricoesAbertas.pequeno}
               onInscrever={() => inscrever('pequeno')} onCancelar={() => cancelar('pequeno')}
               userId={user?.id ?? ''} flex C={C} st={st}
             />
@@ -266,11 +272,11 @@ function VereadorAvatar({ avatarUrl, name, initials, size = 44 }: {
 }
 
 function ExpedienteSection({
-  tipo, titulo, duracao, emoji, color, lista, inscrito, submitting,
+  tipo, titulo, duracao, emoji, color, lista, inscrito, submitting, aberta,
   onInscrever, onCancelar, userId, flex, C, st,
 }: {
   tipo: 'grande' | 'pequeno'; titulo: string; duracao: string; emoji: string; color: string;
-  lista: Inscricao[]; inscrito: boolean; submitting: string | null;
+  lista: Inscricao[]; inscrito: boolean; submitting: string | null; aberta: boolean;
   onInscrever: () => void; onCancelar: () => void; userId: string; flex?: boolean; C: any; st: any;
 }) {
   const isLoading = submitting === tipo || submitting === 'cancel:' + tipo;
@@ -326,6 +332,12 @@ function ExpedienteSection({
             : <Text style={[st.actionBtnText, { color: C.danger }]}>Cancelar inscrição</Text>
           }
         </TouchableOpacity>
+      ) : !aberta ? (
+        <View style={[st.actionBtn, { backgroundColor: C.border, opacity: 0.7 }]}>
+          <Text style={[st.actionBtnText, { color: C.textMuted, fontSize: 14 }]}>
+            Aguardando presidente abrir
+          </Text>
+        </View>
       ) : (
         <TouchableOpacity
           style={[st.actionBtn, { backgroundColor: color }]}
