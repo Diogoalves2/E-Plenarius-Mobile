@@ -136,8 +136,9 @@ export default function ExpedienteScreen() {
         setAtivo(prev => prev ? { ...prev, tempoRestante: data.tempoRestante } : null);
       });
       socket.on('expediente:encerrado', () => { setAtivo(null); loadData(session.id); });
-      socket.on('expediente:inscricoes_status', (data: { tipo: 'grande' | 'pequeno'; aberta: boolean }) => {
-        setInscricoesAbertas(prev => ({ ...prev, [data.tipo]: data.aberta }));
+      socket.on('expediente:inscricoes_status', (data: any) => {
+        if (!data || (data.tipo !== 'grande' && data.tipo !== 'pequeno')) return;
+        setInscricoesAbertas(prev => ({ ...prev, [data.tipo]: !!data.aberta }));
       });
     })();
     return () => { socketRef.current?.disconnect(); socketRef.current = null; };
@@ -239,13 +240,13 @@ export default function ExpedienteScreen() {
               tipo="grande" titulo="Grande Expediente" duracao="10 minutos" emoji="🎤" color={C.primary}
               lista={grandeList} inscrito={!!minhaGrande} submitting={submitting} aberta={inscricoesAbertas.grande}
               onInscrever={() => inscrever('grande')} onCancelar={() => cancelar('grande')}
-              userId={user?.id ?? ''} flex C={C} st={st}
+              userId={user?.id ?? ''} flex={!isPhone} C={C} st={st}
             />
             <ExpedienteSection
               tipo="pequeno" titulo="Pequeno Expediente" duracao="5 minutos" emoji="🗣️" color="#8B5CF6"
               lista={pequenoList} inscrito={!!minhaPequeno} submitting={submitting} aberta={inscricoesAbertas.pequeno}
               onInscrever={() => inscrever('pequeno')} onCancelar={() => cancelar('pequeno')}
-              userId={user?.id ?? ''} flex C={C} st={st}
+              userId={user?.id ?? ''} flex={!isPhone} C={C} st={st}
             />
           </View>
 
