@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity,
+  View, Text, StyleSheet, TouchableOpacity, Image,
   useWindowDimensions, Alert, Pressable, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +10,9 @@ import { useActiveSession } from '@/hooks/useActiveSession';
 import { useVotingSocket } from '@/hooks/useVotingSocket';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Avatar } from '@/components/Avatar';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, API_URL } from '@/lib/api';
+
+const API_BASE = API_URL.replace('/api', '');
 
 const ROLE_LABEL: Record<string, string> = {
   presidente: 'Presidente',
@@ -25,7 +27,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 interface Chamber {
-  id: string; name: string;
+  id: string; name: string; logoUrl?: string | null;
   bienioInicio: number | null; bienioFim: number | null; anoBienio: number | null;
 }
 
@@ -62,6 +64,7 @@ export default function PresidenteHomeScreen() {
     { route: 'expediente', emoji: '🎤', title: 'Expediente',          desc: 'Gerenciar o uso da tribuna', color: '#8B5CF6' },
     { route: 'pauta',      emoji: '📋', title: 'Ordem do Dia',        desc: 'Matérias da sessão',         color: '#F59E0B' },
     { route: 'quorum',     emoji: '👥', title: 'Quórum',              desc: 'Presenças confirmadas',      color: C.success },
+    { route: 'regimento',  emoji: '📜', title: 'Regimento Interno',   desc: 'Consulte o regimento da câmara', color: '#EC4899' },
     { route: 'perfil',     emoji: '👤', title: 'Perfil',              desc: 'Seus dados e sair da conta', color: C.textMuted },
   ], [C]);
 
@@ -153,6 +156,17 @@ export default function PresidenteHomeScreen() {
       marginTop: 10,
     },
     phoneSessionText: { fontSize: 13, fontWeight: '700', flex: 1 },
+    phoneTopBar: {
+      flexDirection: 'row', alignItems: 'center', gap: 10,
+      paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: C.border,
+    },
+    phoneTopLogo: { width: 36, height: 36, borderRadius: 6 },
+    phoneTopLogoFallback: {
+      width: 36, height: 36, borderRadius: 6,
+      alignItems: 'center', justifyContent: 'center',
+      backgroundColor: C.primary + '20',
+    },
+    phoneTopChamberName: { color: C.text, fontSize: 13, fontWeight: '700', flex: 1, textTransform: 'uppercase', letterSpacing: 0.3 },
   }), [C]);
 
   useEffect(() => {
@@ -315,6 +329,14 @@ export default function PresidenteHomeScreen() {
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       {isPhone ? (
         <ScrollView contentContainerStyle={{ padding: 14, gap: 14 }}>
+          <View style={s.phoneTopBar}>
+            {chamber?.logoUrl ? (
+              <Image source={{ uri: `${API_BASE}${chamber.logoUrl}` }} style={s.phoneTopLogo} resizeMode="contain" />
+            ) : (
+              <View style={s.phoneTopLogoFallback}><Text style={{ fontSize: 20 }}>⚖</Text></View>
+            )}
+            <Text style={s.phoneTopChamberName} numberOfLines={2}>{chamber?.name ?? 'Câmara Municipal'}</Text>
+          </View>
           {userCard}
           <View style={s.divider} />
           {cardsGrid}

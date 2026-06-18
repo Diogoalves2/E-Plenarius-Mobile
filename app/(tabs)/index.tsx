@@ -169,6 +169,17 @@ export default function HomeScreen() {
       marginTop: 10,
     },
     phoneSessionText: { fontSize: 13, fontWeight: '700', flex: 1 },
+    phoneTopBar: {
+      flexDirection: 'row', alignItems: 'center', gap: 10,
+      paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: C.border,
+    },
+    phoneTopLogo: { width: 36, height: 36, borderRadius: 6 },
+    phoneTopLogoFallback: {
+      width: 36, height: 36, borderRadius: 6,
+      alignItems: 'center', justifyContent: 'center',
+      backgroundColor: C.primary + '20',
+    },
+    phoneTopChamberName: { color: C.text, fontSize: 13, fontWeight: '700', flex: 1, textTransform: 'uppercase', letterSpacing: 0.3 },
   }), [C]);
 
   useEffect(() => {
@@ -362,6 +373,14 @@ export default function HomeScreen() {
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
       {isPhone ? (
         <ScrollView contentContainerStyle={{ padding: 14, gap: 14 }}>
+          <View style={s.phoneTopBar}>
+            {chamber?.logoUrl ? (
+              <Image source={{ uri: `${API_BASE}${chamber.logoUrl}` }} style={s.phoneTopLogo} resizeMode="contain" />
+            ) : (
+              <View style={s.phoneTopLogoFallback}><Text style={{ fontSize: 20 }}>⚖</Text></View>
+            )}
+            <Text style={s.phoneTopChamberName} numberOfLines={2}>{chamber?.name ?? 'Câmara Municipal'}</Text>
+          </View>
           {userCard}
           <View style={s.divider} />
           {cardsGrid}
