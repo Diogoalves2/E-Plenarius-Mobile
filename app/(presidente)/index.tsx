@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  useWindowDimensions, Alert, Pressable,
+  useWindowDimensions, Alert, Pressable, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -67,9 +67,10 @@ export default function PresidenteHomeScreen() {
     sessionStatus: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
+      alignSelf: 'flex-start', flexShrink: 1,
     },
     sessionDot: { width: 9, height: 9, borderRadius: 5 },
-    sessionStatusText: { fontSize: 16, fontWeight: '600' },
+    sessionStatusText: { fontSize: isPhone ? 13 : 16, fontWeight: '600', flexShrink: 1 },
     connBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
@@ -133,7 +134,7 @@ export default function PresidenteHomeScreen() {
       <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border, alignSelf: 'center' }]}>
         <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
         <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>
-          {session ? `${session.number}ª Sessão` : 'Sem sessão'}
+          {session ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}` : 'Sem sessão'}
         </Text>
       </View>
       <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
@@ -162,7 +163,7 @@ export default function PresidenteHomeScreen() {
         <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border }]}>
           <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
           <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>
-            {session ? `${session.number}ª Sessão` : 'Sem sessão'}
+            {session ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}` : 'Sem sessão'}
           </Text>
         </View>
         <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
@@ -177,9 +178,9 @@ export default function PresidenteHomeScreen() {
   );
 
   const cardsGrid = (
-    <View style={{ flex: 1, gap: 12 }}>
+    <View style={{ flex: isPhone ? undefined : 1, gap: 12 }}>
       {ROWS.map((row, ri) => (
-        <View key={ri} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+        <View key={ri} style={{ flex: isPhone ? undefined : 1, height: isPhone ? 130 : undefined, flexDirection: 'row', gap: 12 }}>
           {row.map(card => {
             const isLive = card.liveKey === 'voting' && votingOpen;
             return (
@@ -197,7 +198,7 @@ export default function PresidenteHomeScreen() {
                   <Text style={s.cardEmoji}>{card.emoji}</Text>
                 </View>
                 <View style={s.cardBody}>
-                  <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2}>
+                  <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.55}>
                     {card.title}
                   </Text>
                 </View>
@@ -225,12 +226,20 @@ export default function PresidenteHomeScreen() {
 
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
-      <View style={{ flex: 1, padding: isPhone ? 14 : 20, gap: isPhone ? 14 : 20 }}>
-        {userCard}
-        <View style={s.divider} />
-        {cardsGrid}
-        {isPhone && logoutBtn}
-      </View>
+      {isPhone ? (
+        <ScrollView contentContainerStyle={{ padding: 14, gap: 14 }}>
+          {userCard}
+          <View style={s.divider} />
+          {cardsGrid}
+          {logoutBtn}
+        </ScrollView>
+      ) : (
+        <View style={{ flex: 1, padding: 20, gap: 20 }}>
+          {userCard}
+          <View style={s.divider} />
+          {cardsGrid}
+        </View>
+      )}
     </SafeAreaView>
   );
 }

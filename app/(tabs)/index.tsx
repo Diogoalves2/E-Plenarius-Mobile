@@ -104,7 +104,7 @@ export default function HomeScreen() {
     chamberLogoImg: { width: 40, height: 40, borderRadius: 8, flexShrink: 0 },
     chamberLogoStar: { fontSize: 20, color: C.success },
     chamberName: { color: C.text, fontSize: 15, fontWeight: '700', flex: 1, lineHeight: 20, textTransform: 'uppercase' },
-    sessionFullTitle: { color: C.success, fontSize: 15, fontWeight: '600', lineHeight: 21, textTransform: 'uppercase' },
+    sessionFullTitle: { color: C.success, fontSize: isPhone ? 12 : 15, fontWeight: '600', lineHeight: isPhone ? 17 : 21, textTransform: 'uppercase' },
     sessionStatus: {
       flexDirection: 'row', alignItems: 'center', gap: 8,
       borderWidth: 1, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7,
@@ -243,9 +243,9 @@ export default function HomeScreen() {
 
   /* Grid de cards com flex — ocupa toda a altura disponível */
   const cardsGrid = (
-    <View style={{ flex: 1, gap: 12 }}>
+    <View style={{ flex: isPhone ? undefined : 1, gap: 12 }}>
       {ROWS.map((row, ri) => (
-        <View key={ri} style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
+        <View key={ri} style={{ flex: isPhone ? undefined : 1, height: isPhone ? 130 : undefined, flexDirection: 'row', gap: 12 }}>
           {row.map(card => {
             const isLive = card.liveKey === 'voting' && votingOpen;
             return (
@@ -264,7 +264,12 @@ export default function HomeScreen() {
                   <Text style={s.cardEmoji}>{card.emoji}</Text>
                 </View>
                 <View style={s.cardBody}>
-                  <Text style={[s.cardTitle, { color: isLive ? card.color : C.text }]} numberOfLines={2}>
+                  <Text
+                    style={[s.cardTitle, { color: isLive ? card.color : C.text }]}
+                    numberOfLines={2}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.55}
+                  >
                     {card.title}
                   </Text>
                 </View>
@@ -294,12 +299,20 @@ export default function HomeScreen() {
   /* ── Portrait ── */
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
-      <View style={{ flex: 1, padding: isPhone ? 14 : 20, gap: isPhone ? 14 : 20 }}>
-        {userCard}
-        <View style={s.divider} />
-        {cardsGrid}
-        {isPhone && leaveBtn}
-      </View>
+      {isPhone ? (
+        <ScrollView contentContainerStyle={{ padding: 14, gap: 14 }}>
+          {userCard}
+          <View style={s.divider} />
+          {cardsGrid}
+          {leaveBtn}
+        </ScrollView>
+      ) : (
+        <View style={{ flex: 1, padding: 20, gap: 20 }}>
+          {userCard}
+          <View style={s.divider} />
+          {cardsGrid}
+        </View>
+      )}
     </SafeAreaView>
   );
 }

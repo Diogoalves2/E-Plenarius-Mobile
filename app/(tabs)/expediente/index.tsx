@@ -313,9 +313,9 @@ function ExpedienteSection({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[st.listaNome, item.userId === userId && { color }]}>
-                  {item.user.name}{item.userId === userId ? ' (você)' : ''}
+                  {item.user?.name ?? '—'}{item.userId === userId ? ' (você)' : ''}
                 </Text>
-                {item.user.party && <Text style={st.listaPartido}>{item.user.party}</Text>}
+                {item.user?.party ? <Text style={st.listaPartido}>{item.user.party}</Text> : null}
               </View>
             </View>
           ))}
@@ -324,7 +324,7 @@ function ExpedienteSection({
 
       {lista.length === 0 && <Text style={st.emptyList}>Nenhum inscrito ainda.</Text>}
 
-      <View style={{ flex: 1 }} />
+      {flex && <View style={{ flex: 1 }} />}
 
       {inscrito ? (
         <TouchableOpacity
