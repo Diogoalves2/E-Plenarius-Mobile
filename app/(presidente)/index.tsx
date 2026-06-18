@@ -103,6 +103,23 @@ export default function PresidenteHomeScreen() {
       paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 1,
     },
     liveText: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
+    // Phone compacto
+    phoneHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    phoneName: { color: C.text, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+    phoneMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    phoneParty: { color: C.warning, fontSize: 13, fontWeight: '700' },
+    phoneRoleBadge: {
+      backgroundColor: C.warning + '20', borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2,
+      borderWidth: 1, borderColor: C.warning + '40',
+    },
+    phoneRoleText: { color: C.warning, fontSize: 11, fontWeight: '700' },
+    phoneStatusRow: { flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' },
+    phoneStatusPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 5,
+      flexShrink: 1, flexGrow: 1, minWidth: 0,
+    },
+    phoneStatusText: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
   }), [C]);
 
   useEffect(() => {
@@ -129,53 +146,90 @@ export default function PresidenteHomeScreen() {
 
   const PANEL_INNER = 264;
 
-  const userCard = isLandscape ? (
-    <View style={s.userCardLandscape}>
-      <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border, alignSelf: 'center' }]}>
-        <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
-        <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>
-          {session ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}` : 'Sem sessão'}
-        </Text>
+  const sessionLabel = session
+    ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}`
+    : 'Sem sessão';
+
+  let userCard: React.ReactNode;
+  if (isPhone) {
+    // Phone (port + land): compacto horizontal, avatar circular pequeno
+    userCard = (
+      <View>
+        <View style={s.phoneHeader}>
+          <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={64} height={64} borderRadius={32} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={s.phoneName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{user?.name}</Text>
+            <View style={s.phoneMetaRow}>
+              {user?.party ? <Text style={s.phoneParty}>{user.party}</Text> : null}
+              <View style={s.phoneRoleBadge}>
+                <Text style={s.phoneRoleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View style={s.phoneStatusRow}>
+          <View style={[s.phoneStatusPill, { borderColor: session ? C.success + '40' : C.border, backgroundColor: (session ? C.success : C.textMuted) + '10' }]}>
+            <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
+            <Text style={[s.phoneStatusText, { color: session ? C.success : C.textMuted }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {sessionLabel}
+            </Text>
+          </View>
+          <View style={[s.phoneStatusPill, { borderColor: connected ? C.primary + '40' : C.border, backgroundColor: (connected ? C.primary : C.textMuted) + '10' }]}>
+            <View style={[s.sessionDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+            <Text style={[s.phoneStatusText, { color: connected ? C.primary : C.textMuted }]} numberOfLines={1}>
+              {connected ? 'Online' : 'Offline'}
+            </Text>
+          </View>
+        </View>
       </View>
-      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
-      <Text style={[s.userName, { textAlign: 'center' }]} numberOfLines={2}>{user?.name}</Text>
-      {user?.party ? <Text style={[s.userParty, { textAlign: 'center' }]}>{user.party}</Text> : null}
-      <View style={[s.roleBadge, { alignSelf: 'center' }]}>
-        <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
-      </View>
-      <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border, alignSelf: 'center' }]}>
-        <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
-        <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
-          {connected ? 'Conectado' : 'Offline'}
-        </Text>
-      </View>
-      {logoutBtn}
-    </View>
-  ) : (
-    <View style={s.userCard}>
-      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={96} height={110} borderRadius={14} />
-      <View style={s.userInfo}>
-        <Text style={s.userName} numberOfLines={2}>{user?.name}</Text>
-        {user?.party ? <Text style={s.userParty}>{user.party}</Text> : null}
-        <View style={s.roleBadge}>
+    );
+  } else if (isLandscape) {
+    userCard = (
+      <View style={s.userCardLandscape}>
+        <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border, alignSelf: 'center' }]}>
+          <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
+          <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>{sessionLabel}</Text>
+        </View>
+        <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
+        <Text style={[s.userName, { textAlign: 'center' }]} numberOfLines={2}>{user?.name}</Text>
+        {user?.party ? <Text style={[s.userParty, { textAlign: 'center' }]}>{user.party}</Text> : null}
+        <View style={[s.roleBadge, { alignSelf: 'center' }]}>
           <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
         </View>
-        <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border }]}>
-          <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
-          <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>
-            {session ? `${session.number}ª Sessão ${session.type === 'ordinaria' ? 'Ordinária' : session.type === 'extraordinaria' ? 'Extraordinária' : session.type === 'solene' ? 'Solene' : 'Especial'}` : 'Sem sessão'}
-          </Text>
-        </View>
-        <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
+        <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border, alignSelf: 'center' }]}>
           <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
           <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
             {connected ? 'Conectado' : 'Offline'}
           </Text>
         </View>
-        {!isPhone && logoutBtn}
+        {logoutBtn}
       </View>
-    </View>
-  );
+    );
+  } else {
+    userCard = (
+      <View style={s.userCard}>
+        <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={96} height={110} borderRadius={14} />
+        <View style={s.userInfo}>
+          <Text style={s.userName} numberOfLines={2}>{user?.name}</Text>
+          {user?.party ? <Text style={s.userParty}>{user.party}</Text> : null}
+          <View style={s.roleBadge}>
+            <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+          </View>
+          <View style={[s.sessionStatus, { borderColor: session ? C.success + '40' : C.border }]}>
+            <View style={[s.sessionDot, { backgroundColor: session ? C.success : C.textMuted }]} />
+            <Text style={[s.sessionStatusText, { color: session ? C.success : C.textMuted }]}>{sessionLabel}</Text>
+          </View>
+          <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
+            <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+            <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
+              {connected ? 'Conectado' : 'Offline'}
+            </Text>
+          </View>
+          {logoutBtn}
+        </View>
+      </View>
+    );
+  }
 
   const cardsGrid = (
     <View style={{ flex: isPhone ? undefined : 1, gap: 12 }}>
@@ -211,7 +265,7 @@ export default function PresidenteHomeScreen() {
     </View>
   );
 
-  if (isLandscape) {
+  if (isLandscape && !isPhone) {
     return (
       <SafeAreaView style={s.root} edges={['top', 'bottom']}>
         <View style={s.landscapeContainer}>

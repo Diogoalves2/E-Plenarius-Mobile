@@ -145,6 +145,22 @@ export default function HomeScreen() {
       paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 1,
     },
     liveText: { color: '#fff', fontSize: 9, fontWeight: '800', letterSpacing: 0.8 },
+    phoneHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    phoneName: { color: C.text, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+    phoneMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    phoneParty: { color: C.warning, fontSize: 13, fontWeight: '700' },
+    phoneRoleBadge: {
+      backgroundColor: C.warning + '20', borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2,
+      borderWidth: 1, borderColor: C.warning + '40',
+    },
+    phoneRoleText: { color: C.warning, fontSize: 11, fontWeight: '700' },
+    phoneStatusRow: { flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' },
+    phoneStatusPill: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      borderWidth: 1, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 5,
+      flexShrink: 1, flexGrow: 1, minWidth: 0,
+    },
+    phoneStatusText: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
   }), [C]);
 
   useEffect(() => {
@@ -202,44 +218,86 @@ export default function HomeScreen() {
     </Pressable>
   );
 
-  const userCard = isLandscape ? (
-    <View style={s.userCardLandscape}>
-      {sessionBlock}
-      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
-      <Text style={[s.userName, { textAlign: 'center' }]} numberOfLines={2}>{user?.name}</Text>
-      {user?.party ? <Text style={[s.userParty, { textAlign: 'center' }]}>{user.party}</Text> : null}
-      <View style={[s.roleBadge, { alignSelf: 'center' }]}>
-        <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+  let userCard: React.ReactNode;
+  if (isPhone) {
+    userCard = (
+      <View>
+        <View style={s.phoneHeader}>
+          <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={64} height={64} borderRadius={32} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={s.phoneName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{user?.name}</Text>
+            <View style={s.phoneMetaRow}>
+              {user?.party ? <Text style={s.phoneParty}>{user.party}</Text> : null}
+              <View style={s.phoneRoleBadge}>
+                <Text style={s.phoneRoleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View style={s.phoneStatusRow}>
+          {session ? (
+            <View style={[s.phoneStatusPill, { borderColor: C.success + '40', backgroundColor: C.success + '10', flex: 2 }]}>
+              <View style={[s.sessionDot, { backgroundColor: C.success }]} />
+              <Text style={[s.phoneStatusText, { color: C.success }]} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
+                {sessionTitle(session.number, session.type, chamber)}
+              </Text>
+            </View>
+          ) : (
+            <View style={[s.phoneStatusPill, { borderColor: C.border, flex: 2 }]}>
+              <View style={[s.sessionDot, { backgroundColor: C.textMuted }]} />
+              <Text style={[s.phoneStatusText, { color: C.textMuted }]}>Sem sessão</Text>
+            </View>
+          )}
+          <View style={[s.phoneStatusPill, { borderColor: connected ? C.primary + '40' : C.border, backgroundColor: (connected ? C.primary : C.textMuted) + '10' }]}>
+            <View style={[s.sessionDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+            <Text style={[s.phoneStatusText, { color: connected ? C.primary : C.textMuted }]} numberOfLines={1}>
+              {connected ? 'Online' : 'Offline'}
+            </Text>
+          </View>
+        </View>
       </View>
-      <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border, alignSelf: 'center' }]}>
-        <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
-        <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
-          {connected ? 'Conectado' : 'Offline'}
-        </Text>
-      </View>
-      {leaveBtn}
-    </View>
-  ) : (
-    <View style={s.userCard}>
-      <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={96} height={110} borderRadius={14} />
-      <View style={s.userInfo}>
-        <Text style={s.userName} numberOfLines={2}>{user?.name}</Text>
-        {user?.party ? <Text style={s.userParty}>{user.party}</Text> : null}
-        <View style={s.roleBadge}>
+    );
+  } else if (isLandscape) {
+    userCard = (
+      <View style={s.userCardLandscape}>
+        {sessionBlock}
+        <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={PANEL_INNER} height={320} borderRadius={18} />
+        <Text style={[s.userName, { textAlign: 'center' }]} numberOfLines={2}>{user?.name}</Text>
+        {user?.party ? <Text style={[s.userParty, { textAlign: 'center' }]}>{user.party}</Text> : null}
+        <View style={[s.roleBadge, { alignSelf: 'center' }]}>
           <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
         </View>
-        {sessionBlock}
-        <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
+        <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border, alignSelf: 'center' }]}>
           <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
           <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
             {connected ? 'Conectado' : 'Offline'}
           </Text>
         </View>
-        {/* Em phone, Sair vai pro rodapé após os cards */}
-        {!isPhone && leaveBtn}
+        {leaveBtn}
       </View>
-    </View>
-  );
+    );
+  } else {
+    userCard = (
+      <View style={s.userCard}>
+        <Avatar name={user?.name ?? ''} avatarUrl={user?.avatarUrl} width={96} height={110} borderRadius={14} />
+        <View style={s.userInfo}>
+          <Text style={s.userName} numberOfLines={2}>{user?.name}</Text>
+          {user?.party ? <Text style={s.userParty}>{user.party}</Text> : null}
+          <View style={s.roleBadge}>
+            <Text style={s.roleText}>{ROLE_LABEL[user?.role ?? ''] ?? user?.role}</Text>
+          </View>
+          {sessionBlock}
+          <View style={[s.connBadge, { borderColor: connected ? C.primary + '40' : C.border }]}>
+            <View style={[s.connDot, { backgroundColor: connected ? C.primary : C.textMuted }]} />
+            <Text style={[s.connText, { color: connected ? C.primary : C.textMuted }]}>
+              {connected ? 'Conectado' : 'Offline'}
+            </Text>
+          </View>
+          {leaveBtn}
+        </View>
+      </View>
+    );
+  }
 
   /* Grid de cards com flex — ocupa toda a altura disponível */
   const cardsGrid = (
@@ -283,7 +341,7 @@ export default function HomeScreen() {
   );
 
   /* ── Landscape ── */
-  if (isLandscape) {
+  if (isLandscape && !isPhone) {
     return (
       <SafeAreaView style={s.root} edges={['top', 'bottom']}>
         <View style={s.landscapeContainer}>
