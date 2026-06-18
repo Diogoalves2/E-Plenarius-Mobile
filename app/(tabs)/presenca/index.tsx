@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useActiveSession } from '@/hooks/useActiveSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { apiFetch } from '@/lib/api';
 import { Avatar } from '@/components/Avatar';
 import { BackButton } from '@/components/BackButton';
@@ -18,6 +19,7 @@ export default function PresencaScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { colors: C } = useTheme();
+  const isPhone = useIsPhone();
   const { session, loading: sessionLoading } = useActiveSession();
   const [presences, setPresences] = useState<Presence[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ export default function PresencaScreen() {
       paddingHorizontal: 16, paddingVertical: 14,
       borderBottomWidth: 1, borderBottomColor: C.border,
     },
-    headerTitle: { color: C.text, fontSize: 20, fontWeight: '700', letterSpacing: -0.5 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 20, fontWeight: '700', letterSpacing: -0.5, flexShrink: 1 },
     content: { flex: 1, padding: 20, gap: 16 },
     userCard: {
       backgroundColor: C.card, borderRadius: 16, padding: 16,
@@ -67,7 +69,7 @@ export default function PresencaScreen() {
     confirmBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
     emptyTitle: { color: C.text, fontSize: 18, fontWeight: '700', marginBottom: 8 },
     emptyText: { color: C.textMuted, fontSize: 14, textAlign: 'center' },
-  }), [C]);
+  }), [C, isPhone]);
 
   async function loadPresences() {
     if (!session) return;
@@ -99,7 +101,7 @@ export default function PresencaScreen() {
     <SafeAreaView style={s.root}>
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} />
-        <Text style={s.headerTitle}>Minha Presença</Text>
+        <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Minha Presença</Text>
       </View>
 
       {sessionLoading ? (

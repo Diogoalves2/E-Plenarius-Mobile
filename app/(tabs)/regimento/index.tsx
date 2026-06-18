@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { apiFetch, API_URL } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
 
@@ -30,6 +31,7 @@ export default function RegimentoScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { colors: C } = useTheme();
+  const isPhone = useIsPhone();
   const [regimento, setRegimento] = useState<Regimento | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +43,7 @@ export default function RegimentoScreen() {
       paddingHorizontal: 16, paddingVertical: 14,
       borderBottomWidth: 1, borderBottomColor: C.border,
     },
-    headerTitle: { color: C.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 22, fontWeight: '700', letterSpacing: -0.5, flexShrink: 1 },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
     emptyTitle: { color: C.text, fontSize: 22, fontWeight: '700', textAlign: 'center' },
     emptyText: { color: C.textMuted, fontSize: 22, textAlign: 'center', lineHeight: 30 },
@@ -90,7 +92,7 @@ export default function RegimentoScreen() {
       color: C.textMuted, fontSize: 14, textAlign: 'center',
       lineHeight: 21, paddingHorizontal: 16,
     },
-  }), [C]);
+  }), [C, isPhone]);
 
   const load = useCallback(async () => {
     if (!user?.chamberId) return;
@@ -122,7 +124,7 @@ export default function RegimentoScreen() {
     <SafeAreaView style={s.root}>
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} />
-        <Text style={s.headerTitle}>Regimento Interno</Text>
+        <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Regimento Interno</Text>
       </View>
 
       {loading ? (

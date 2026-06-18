@@ -22,6 +22,7 @@ export default function VotacaoScreen() {
   const [voting, setVoting] = useLocalState(false);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const isPhone = Math.min(width, height) < 600;
 
   const total = counts.sim + counts.nao + counts.abstencao;
 
@@ -34,8 +35,8 @@ export default function VotacaoScreen() {
       borderBottomWidth: 1, borderBottomColor: C.border,
       backgroundColor: C.surface,
     },
-    headerTitle: { color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
-    headerSub: { color: C.textMuted, fontSize: 14, marginTop: 1 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 22, fontWeight: '800', letterSpacing: -0.5, flexShrink: 1 },
+    headerSub: { color: C.textMuted, fontSize: isPhone ? 12 : 14, marginTop: 1 },
     connBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 6,
       borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
@@ -85,7 +86,7 @@ export default function VotacaoScreen() {
     resultText: { fontSize: 30, fontWeight: '900', letterSpacing: -0.5 },
     emptyTitle: { color: C.text, fontSize: 24, fontWeight: '800', marginBottom: 10, textAlign: 'center' },
     emptyText: { color: C.textMuted, fontSize: 18, textAlign: 'center', lineHeight: 26 },
-  }), [C]);
+  }), [C, isPhone]);
 
   async function handleVote(choice: 'sim' | 'nao' | 'abstencao') {
     if (voting || myVote) return;
@@ -219,7 +220,7 @@ function Header({ router, connected, session, s, C }: { router: any; connected: 
     <View style={s.header}>
       <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} />
       <View style={{ flex: 1 }}>
-        <Text style={s.headerTitle}>Votação</Text>
+        <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Votação</Text>
         {session ? (
           <Text style={s.headerSub}>
             {session.number}ª Sessão {session.type.charAt(0).toUpperCase() + session.type.slice(1)}

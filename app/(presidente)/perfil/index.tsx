@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { Avatar } from '@/components/Avatar';
 import { BackButton } from '@/components/BackButton';
 
@@ -18,6 +19,7 @@ export default function PresidentePerfilScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { colors: C, isDark, toggleTheme } = useTheme();
+  const isPhone = useIsPhone();
 
   const s = useMemo(() => StyleSheet.create({
     root: { flex: 1, backgroundColor: C.bg },
@@ -27,7 +29,7 @@ export default function PresidentePerfilScreen() {
       borderBottomWidth: 1, borderBottomColor: C.border,
       backgroundColor: C.surface,
     },
-    headerTitle: { color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 22, fontWeight: '800', letterSpacing: -0.5, flexShrink: 1 },
     scroll: { padding: 20, gap: 20, alignItems: 'center' },
     avatarWrap: { alignItems: 'center', gap: 8, paddingTop: 8 },
     name: { color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5, marginTop: 4 },
@@ -65,7 +67,7 @@ export default function PresidentePerfilScreen() {
       borderWidth: 1, borderColor: C.danger + '40',
     },
     logoutText: { color: C.danger, fontSize: 15, fontWeight: '700' },
-  }), [C]);
+  }), [C, isPhone]);
 
   function handleLogout() {
     Alert.alert('Sair', 'Deseja encerrar sua sessão?', [
@@ -80,7 +82,7 @@ export default function PresidentePerfilScreen() {
     <SafeAreaView style={s.root}>
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(presidente)')} />
-        <Text style={s.headerTitle}>Perfil</Text>
+        <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Perfil</Text>
       </View>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <View style={s.avatarWrap}>

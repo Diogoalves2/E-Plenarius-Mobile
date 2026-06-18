@@ -53,7 +53,7 @@ export default function ExpedienteScreen() {
       borderBottomWidth: 1, borderBottomColor: C.border,
       backgroundColor: C.bg,
     },
-    headerTitle: { color: C.text, fontSize: isPhone ? 18 : 20, fontWeight: '700', letterSpacing: -0.3, flex: 1 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 20, fontWeight: '700', letterSpacing: -0.3, flex: 1 },
     scroll: { padding: isPhone ? 12 : 16, gap: isPhone ? 12 : 16 },
     sectionsRow: { flexDirection: isPhone ? 'column' : 'row', gap: isPhone ? 12 : 14 },
     ativoCard: {
@@ -184,7 +184,7 @@ export default function ExpedienteScreen() {
     <SafeAreaView style={st.root}>
       <View style={st.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} />
-        <Text style={st.headerTitle}>Expediente</Text>
+        <Text style={st.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Expediente</Text>
       </View>
 
       {sessionLoading ? (

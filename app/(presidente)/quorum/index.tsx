@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useActiveSession } from '@/hooks/useActiveSession';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { apiFetch } from '@/lib/api';
 import { Avatar } from '@/components/Avatar';
 import { BackButton } from '@/components/BackButton';
@@ -20,6 +21,7 @@ interface Presence {
 export default function QuorumScreen() {
   const router = useRouter();
   const { colors: C } = useTheme();
+  const isPhone = useIsPhone();
   const { session, loading: sessionLoading } = useActiveSession();
   const [presences, setPresences] = useState<Presence[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,8 +35,8 @@ export default function QuorumScreen() {
       borderBottomWidth: 1, borderBottomColor: C.border,
       backgroundColor: C.surface,
     },
-    headerTitle: { color: C.text, fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
-    headerSub: { color: C.textMuted, fontSize: 14, marginTop: 1 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 22, fontWeight: '800', letterSpacing: -0.5, flexShrink: 1 },
+    headerSub: { color: C.textMuted, fontSize: isPhone ? 12 : 14, marginTop: 1 },
     refreshBtn: {
       backgroundColor: C.card, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8,
       borderWidth: 1, borderColor: C.border,
@@ -55,7 +57,7 @@ export default function QuorumScreen() {
     presenceTime: { color: C.textMuted, fontSize: 12 },
     emptyTitle: { color: C.text, fontSize: 17, fontWeight: '700', marginBottom: 8 },
     emptyText: { color: C.textMuted, fontSize: 14, textAlign: 'center' },
-  }), [C]);
+  }), [C, isPhone]);
 
   const load = useCallback(async () => {
     if (!session) return;
@@ -78,7 +80,7 @@ export default function QuorumScreen() {
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(presidente)')} />
         <View style={{ flex: 1 }}>
-          <Text style={s.headerTitle}>Quórum</Text>
+          <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Quórum</Text>
           {session && (
             <Text style={s.headerSub}>
               {session.number}ª Sessão {session.type.charAt(0).toUpperCase() + session.type.slice(1)}

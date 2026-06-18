@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { io, Socket } from 'socket.io-client';
 import * as SecureStore from 'expo-secure-store';
 import { useActiveSession } from '@/hooks/useActiveSession';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { useTheme } from '@/contexts/ThemeContext';
 import { apiFetch, API_URL } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
@@ -73,6 +74,7 @@ export default function PresidenteExpedienteScreen() {
   const router = useRouter();
   const { session, loading: sessionLoading } = useActiveSession();
   const { colors: C } = useTheme();
+  const isPhone = useIsPhone();
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
   const [ativo, setAtivo] = useState<ExpedienteAtivo | null>(null);
   const [tab, setTab] = useState<'grande' | 'pequeno'>('grande');
@@ -96,8 +98,8 @@ export default function PresidenteExpedienteScreen() {
       borderBottomWidth: 1, borderBottomColor: C.border,
       backgroundColor: C.surface,
     },
-    headerTitle: { color: C.text, fontSize: 24, fontWeight: '800', letterSpacing: -0.5 },
-    headerSub: { color: C.textMuted, fontSize: 15, marginTop: 1 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 24, fontWeight: '800', letterSpacing: -0.5, flexShrink: 1 },
+    headerSub: { color: C.textMuted, fontSize: isPhone ? 12 : 15, marginTop: 1 },
     convidadoHeaderBtn: {
       backgroundColor: GUEST_COLOR + '20', borderRadius: 12,
       paddingHorizontal: 14, paddingVertical: 9,
@@ -220,7 +222,7 @@ export default function PresidenteExpedienteScreen() {
     modalCancelBtnText: { color: C.textMuted, fontSize: 17, fontWeight: '600' },
     modalConfirmBtn: { backgroundColor: GUEST_COLOR, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
     modalConfirmBtnText: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  }), [C]);
+  }), [C, isPhone]);
 
   const loadData = useCallback(async (sessionId: string) => {
     try {
@@ -324,7 +326,7 @@ export default function PresidenteExpedienteScreen() {
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(presidente)')} />
         <View style={{ flex: 1 }}>
-          <Text style={s.headerTitle}>Expediente</Text>
+          <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Expediente</Text>
           {session && (
             <Text style={s.headerSub}>
               {session.number}ª Sessão {session.type.charAt(0).toUpperCase() + session.type.slice(1)}

@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useActiveSession } from '@/hooks/useActiveSession';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsPhone } from '@/hooks/useIsPhone';
 import { apiFetch, API_URL } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
 
@@ -27,6 +28,7 @@ interface AgendaItem {
 export default function PautaScreen() {
   const router = useRouter();
   const { colors: C } = useTheme();
+  const isPhone = useIsPhone();
   const { session, loading: sessionLoading } = useActiveSession();
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ export default function PautaScreen() {
       paddingHorizontal: 16, paddingVertical: 14,
       borderBottomWidth: 1, borderBottomColor: C.border,
     },
-    headerTitle: { color: C.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 16 : 22, fontWeight: '700', letterSpacing: -0.5, flexShrink: 1 },
     scroll: { padding: 16, gap: 14 },
     card: {
       backgroundColor: C.card, borderRadius: 18, padding: 20,
@@ -90,7 +92,7 @@ export default function PautaScreen() {
     pdfBtnText: { color: '#fff', fontSize: 17, fontWeight: '800' },
     emptyTitle: { color: C.text, fontSize: 20, fontWeight: '700', marginBottom: 8 },
     emptyText:  { color: C.textMuted, fontSize: 16, textAlign: 'center', lineHeight: 22 },
-  }), [C]);
+  }), [C, isPhone]);
 
   useEffect(() => {
     if (!session) return;
@@ -114,7 +116,7 @@ export default function PautaScreen() {
     <SafeAreaView style={s.root}>
       <View style={s.header}>
         <BackButton onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} />
-        <Text style={s.headerTitle}>Ordem do Dia</Text>
+        <Text style={s.headerTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>Ordem do Dia</Text>
       </View>
 
       {sessionLoading || loading ? (
