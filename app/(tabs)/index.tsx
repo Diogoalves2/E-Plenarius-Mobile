@@ -54,6 +54,7 @@ export default function HomeScreen() {
   const { votingOpen, connected } = useVotingSocket(session?.id ?? null);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const isPhone = Math.min(width, height) < 600;
   const [chamber, setChamber] = useState<Chamber | null>(null);
 
   const CARDS = useMemo<NavCard[]>(() => [
@@ -129,13 +130,16 @@ export default function HomeScreen() {
       flex: 1, backgroundColor: C.card, borderRadius: 8,
       borderWidth: 1, overflow: 'hidden', position: 'relative', flexDirection: 'column',
     },
-    cardIconWrap: { flex: 1.4, alignItems: 'center', justifyContent: 'center', minHeight: 80 },
-    cardEmoji: { fontSize: 56 },
+    cardIconWrap: { flex: 1.4, alignItems: 'center', justifyContent: 'center', minHeight: isPhone ? 60 : 80 },
+    cardEmoji: { fontSize: isPhone ? 40 : 56 },
     cardBody: {
-      flex: 1, paddingHorizontal: 14, paddingVertical: 16,
+      flex: 1, paddingHorizontal: 8, paddingVertical: isPhone ? 10 : 16,
       alignItems: 'center', justifyContent: 'center',
     },
-    cardTitle: { fontSize: 30, fontWeight: '800', letterSpacing: -0.5, textAlign: 'center' },
+    cardTitle: {
+      fontSize: isPhone ? 18 : 30, fontWeight: '800',
+      letterSpacing: -0.5, textAlign: 'center',
+    },
     liveBadge: {
       position: 'absolute', top: 8, right: 8,
       paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 1,
@@ -231,7 +235,8 @@ export default function HomeScreen() {
             {connected ? 'Conectado' : 'Offline'}
           </Text>
         </View>
-        {leaveBtn}
+        {/* Em phone, Sair vai pro rodapé após os cards */}
+        {!isPhone && leaveBtn}
       </View>
     </View>
   );
@@ -289,10 +294,11 @@ export default function HomeScreen() {
   /* ── Portrait ── */
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
-      <View style={{ flex: 1, padding: 20, gap: 20 }}>
+      <View style={{ flex: 1, padding: isPhone ? 14 : 20, gap: isPhone ? 14 : 20 }}>
         {userCard}
         <View style={s.divider} />
         {cardsGrid}
+        {isPhone && leaveBtn}
       </View>
     </SafeAreaView>
   );

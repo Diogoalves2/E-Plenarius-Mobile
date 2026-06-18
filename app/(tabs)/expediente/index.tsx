@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, ActivityIndicator, Alert, Image,
+  ScrollView, ActivityIndicator, Alert, Image, useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -35,6 +35,8 @@ export default function ExpedienteScreen() {
   const { session, loading: sessionLoading } = useActiveSession();
   const { user } = useAuth();
   const { colors: C } = useTheme();
+  const { width, height } = useWindowDimensions();
+  const isPhone = Math.min(width, height) < 600;
   const [inscricoes, setInscricoes] = useState<Inscricao[]>([]);
   const [ativo, setAtivo] = useState<ExpedienteAtivo | null>(null);
   const [inscricoesAbertas, setInscricoesAbertas] = useState<{ grande: boolean; pequeno: boolean }>({ grande: false, pequeno: false });
@@ -46,13 +48,14 @@ export default function ExpedienteScreen() {
     root: { flex: 1, backgroundColor: C.bg },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     header: {
-      flexDirection: 'row', alignItems: 'center', gap: 10,
-      paddingHorizontal: 16, paddingVertical: 14,
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      paddingHorizontal: 14, paddingVertical: isPhone ? 10 : 14,
       borderBottomWidth: 1, borderBottomColor: C.border,
+      backgroundColor: C.bg,
     },
-    headerTitle: { color: C.text, fontSize: 20, fontWeight: '700', letterSpacing: -0.5 },
-    scroll: { padding: 16, gap: 16 },
-    sectionsRow: { flexDirection: 'row', gap: 14 },
+    headerTitle: { color: C.text, fontSize: isPhone ? 18 : 20, fontWeight: '700', letterSpacing: -0.3, flex: 1 },
+    scroll: { padding: isPhone ? 12 : 16, gap: isPhone ? 12 : 16 },
+    sectionsRow: { flexDirection: isPhone ? 'column' : 'row', gap: isPhone ? 12 : 14 },
     ativoCard: {
       backgroundColor: 'rgba(16,185,129,0.08)', borderRadius: 20, padding: 24,
       borderWidth: 1, borderColor: C.success + '40', gap: 14,
