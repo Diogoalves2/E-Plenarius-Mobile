@@ -10,6 +10,7 @@ import { useActiveSession } from '@/hooks/useActiveSession';
 import { useVotingSocket } from '@/hooks/useVotingSocket';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Avatar } from '@/components/Avatar';
+import { apiFetch } from '@/lib/api';
 
 const ROLE_LABEL: Record<string, string> = {
   presidente: 'Presidente',
@@ -125,6 +126,12 @@ export default function PresidenteHomeScreen() {
   useEffect(() => {
     if (votingOpen) router.push('/(presidente)/controle' as any);
   }, [votingOpen]);
+
+  // Auto-confirma presença na sessão ativa
+  useEffect(() => {
+    if (!session?.id) return;
+    apiFetch(`/sessions/${session.id}/presence`, { method: 'POST' }).catch(() => {});
+  }, [session?.id]);
 
   function go(route: string) { router.push(`/(presidente)/${route}` as any); }
 
