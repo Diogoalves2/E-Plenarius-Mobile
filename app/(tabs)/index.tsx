@@ -179,7 +179,7 @@ export default function HomeScreen() {
       alignItems: 'center', justifyContent: 'center',
       backgroundColor: C.primary + '20',
     },
-    phoneTopChamberName: { color: C.text, fontSize: 13, fontWeight: '700', flex: 1, textTransform: 'uppercase', letterSpacing: 0.3 },
+    phoneTopChamberName: { color: C.text, fontSize: 18, fontWeight: '800', flex: 1, textTransform: 'uppercase', letterSpacing: 0.3, lineHeight: 22 },
   }), [C]);
 
   useEffect(() => {
@@ -379,7 +379,7 @@ export default function HomeScreen() {
             ) : (
               <View style={s.phoneTopLogoFallback}><Text style={{ fontSize: 20 }}>⚖</Text></View>
             )}
-            <Text style={s.phoneTopChamberName} numberOfLines={2}>{chamber?.name ?? 'Câmara Municipal'}</Text>
+            <Text style={s.phoneTopChamberName} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.65}>{chamber?.name ?? 'Câmara Municipal'}</Text>
           </View>
           {userCard}
           <View style={s.divider} />
