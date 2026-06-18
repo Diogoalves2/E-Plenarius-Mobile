@@ -312,10 +312,15 @@ function ExpedienteSection({
                 <Text style={[st.listaOrdemText, { color }]}>{i + 1}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[st.listaNome, item.userId === userId && { color }]}>
+                <Text
+                  style={[st.listaNome, item.userId === userId && { color }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                >
                   {item.user?.name ?? '—'}{item.userId === userId ? ' (você)' : ''}
                 </Text>
-                {item.user?.party ? <Text style={st.listaPartido}>{item.user.party}</Text> : null}
+                {!isPhone && item.user?.party ? <Text style={st.listaPartido}>{item.user.party}</Text> : null}
               </View>
             </View>
           ))}

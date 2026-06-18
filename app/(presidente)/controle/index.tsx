@@ -30,6 +30,7 @@ export default function ControleScreen() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const isPhone = Math.min(width, height) < 600;
 
   const s = useMemo(() => StyleSheet.create({
     root: { flex: 1, backgroundColor: C.bg },

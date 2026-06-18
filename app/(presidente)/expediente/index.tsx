@@ -152,16 +152,16 @@ export default function PresidenteExpedienteScreen() {
     tabBadgeAtiva: { backgroundColor: C.warning + '30' },
     tabBadgeText: { color: C.textMuted, fontSize: 14, fontWeight: '700' },
     itemCard: {
-      backgroundColor: C.card, borderRadius: 18, padding: 18,
+      backgroundColor: C.card, borderRadius: isPhone ? 12 : 18, padding: isPhone ? 10 : 18,
       borderWidth: 1, borderColor: C.border,
-      flexDirection: 'row', alignItems: 'center', gap: 14,
+      flexDirection: 'row', alignItems: 'center', gap: isPhone ? 10 : 14,
     },
     itemCardAtivo: { borderColor: C.warning + '50', backgroundColor: C.warning + '08' },
     itemCardGuest: { borderColor: GUEST_COLOR + '40', backgroundColor: GUEST_COLOR + '08' },
-    ordem: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-    ordemText: { fontSize: 20, fontWeight: '800' },
-    itemNome: { color: C.text, fontSize: 22, fontWeight: '700' },
-    itemPartido: { color: C.textMuted, fontSize: 17, marginTop: 3 },
+    ordem: { width: isPhone ? 32 : 42, height: isPhone ? 32 : 42, borderRadius: isPhone ? 8 : 12, alignItems: 'center', justifyContent: 'center' },
+    ordemText: { fontSize: isPhone ? 16 : 20, fontWeight: '800' },
+    itemNome: { color: C.text, fontSize: isPhone ? 15 : 22, fontWeight: '700', flexShrink: 1 },
+    itemPartido: { color: C.textMuted, fontSize: isPhone ? 12 : 17, marginTop: 3 },
     guestBadge: {
       backgroundColor: GUEST_COLOR + '20', borderRadius: 8,
       paddingHorizontal: 7, paddingVertical: 2,
@@ -449,21 +449,27 @@ export default function PresidenteExpedienteScreen() {
                     <Text style={[s.ordemText, { color: isAtivo ? C.warning : info.isGuest ? GUEST_COLOR : C.primary }]}>{i + 1}</Text>
                   </View>
                   <VereadorAvatar avatarUrl={info.avatarUrl} name={info.name}
-                    initials={info.initials} size={46} isGuest={info.isGuest} />
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Text style={s.itemNome}>{info.name}</Text>
-                      {info.isGuest && (
-                        <View style={s.guestBadge}>
-                          <Text style={s.guestBadgeText}>CONVIDADO</Text>
-                        </View>
+                    initials={info.initials} size={isPhone ? 36 : 46} isGuest={info.isGuest} />
+                  {isPhone ? (
+                    <Text style={[s.itemNome, { flex: 1 }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+                      {info.name}
+                    </Text>
+                  ) : (
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text style={s.itemNome}>{info.name}</Text>
+                        {info.isGuest && (
+                          <View style={s.guestBadge}>
+                            <Text style={s.guestBadgeText}>CONVIDADO</Text>
+                          </View>
+                        )}
+                      </View>
+                      {info.party && <Text style={s.itemPartido}>{info.party}</Text>}
+                      {info.isGuest && item.guestTempo && (
+                        <Text style={s.guestTempo}>{item.guestTempo} min</Text>
                       )}
                     </View>
-                    {info.party && <Text style={s.itemPartido}>{info.party}</Text>}
-                    {info.isGuest && item.guestTempo && (
-                      <Text style={s.guestTempo}>{item.guestTempo} min</Text>
-                    )}
-                  </View>
+                  )}
                   {isConcluido ? (
                     <View style={s.concluidoBadge}>
                       <Text style={s.concluidoText}>✓ Concluído</Text>
