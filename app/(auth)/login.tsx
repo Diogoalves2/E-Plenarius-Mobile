@@ -136,7 +136,8 @@ export default function LoginGridScreen() {
     const showNoSessionWarn = lastUser.role !== 'presidente' && chamber && !chamber.hasActiveSession;
 
     return (
-      <ScrollView style={s.root} contentContainerStyle={isPhone ? { flexGrow: 1 } : undefined}>
+      // flexGrow: ocupa no mínimo a tela inteira — a foto vai até o fim no tablet.
+      <ScrollView style={s.root} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={[s.splitContainer, isPhone && s.splitPhone]}>
           {/* ── Foto do vereador ── */}
           <View style={[s.leftPhotoWrap, isPhone && s.leftPhotoPhone]}>
