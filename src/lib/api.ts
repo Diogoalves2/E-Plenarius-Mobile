@@ -1,6 +1,16 @@
 import * as SecureStore from 'expo-secure-store';
 import { authEvents } from './auth-events';
 
+/** Erro da API com status e código do backend (ex.: PIN_REQUIRED, TIE_NEEDS_PRESIDENT). */
+export class ApiError extends Error {
+  constructor(message: string, public status: number, public code?: string) { super(message); }
+}
+
+function toApiError(status: number, body: any): ApiError {
+  const msg = Array.isArray(body?.message) ? body.message.join(' · ') : body?.message;
+  return new ApiError(msg || `HTTP ${status}`, status, body?.code);
+}
+
 // Sobrescrevível no build: EXPO_PUBLIC_API_URL=https://.../api. Fallback = backend na VPS.
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ?? 'https://eplenarius.2-25-152-184.sslip.io/api';
@@ -63,7 +73,7 @@ export async function apiFetch<T = unknown>(
           const retry = await fetchWithTimeout(`${API_URL}${path}`, { ...options, headers });
           if (!retry.ok) {
             const retryBody = await retry.json().catch(() => ({}));
-            throw new Error((retryBody as any)?.message || `HTTP ${retry.status}`);
+            throw toApiError(retry.status, retryBody);
           }
           if (retry.status === 204) return undefined as T;
           return retry.json() as Promise<T>;
@@ -78,7 +88,7 @@ export async function apiFetch<T = unknown>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as any)?.message || `HTTP ${res.status}`);
+    throw toApiError(res.status, body);
   }
 
   if (res.status === 204) return undefined as T;

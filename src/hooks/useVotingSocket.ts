@@ -115,13 +115,13 @@ export function useVotingSocket(sessionId: string | null) {
     };
   }, [sessionId]);
 
-  async function vote(choice: 'sim' | 'nao' | 'abstencao') {
+  async function vote(choice: 'sim' | 'nao' | 'abstencao', pin?: string) {
     if (!activeItem) return;
     setMyVote(choice);
     try {
       await apiFetch('/voting/cast', {
         method: 'POST',
-        body: JSON.stringify({ agendaItemId: activeItem.id, choice }),
+        body: JSON.stringify({ agendaItemId: activeItem.id, choice, ...(pin ? { pin } : {}) }),
       });
     } catch (err: any) {
       if (/já votou/i.test(err?.message ?? '')) { setMyVote('registrado'); return; }

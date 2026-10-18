@@ -8,6 +8,9 @@ interface Session {
   type: string;
   date: string;
   status: string;
+  chamberId?: string;
+  /** Fase atual do roteiro da sessão. */
+  phase?: string | null;
 }
 
 export function useActiveSession() {

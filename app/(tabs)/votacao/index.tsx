@@ -1,7 +1,7 @@
-import React, { useMemo, useState as useLocalState } from 'react';
+import React, { useEffect, useMemo, useState as useLocalState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, ActivityIndicator, Alert, useWindowDimensions,
+  ScrollView, ActivityIndicator, Alert, useWindowDimensions, Modal, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,8 @@ import { useVotingSocket } from '@/hooks/useVotingSocket';
 import { useActiveSession } from '@/hooks/useActiveSession';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BackButton } from '@/components/BackButton';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/lib/api';
 
 const COLOR_SIM     = '#22c55e';
 const COLOR_NAO     = '#ef4444';
@@ -20,6 +22,19 @@ export default function VotacaoScreen() {
   const { session, loading } = useActiveSession();
   const { connected, activeItem, counts, countsHidden, totalVotes, myVote, votingOpen, vote } = useVotingSocket(session?.id ?? null);
   const [voting, setVoting] = useLocalState(false);
+  const { chamberSlug } = useAuth();
+
+  // Câmara pode exigir o PIN do vereador para confirmar cada voto.
+  const [requirePin, setRequirePin] = useLocalState(false);
+  const [pinFor, setPinFor] = useLocalState<'sim' | 'nao' | 'abstencao' | null>(null);
+  const [pin, setPin] = useLocalState('');
+  const [pinError, setPinError] = useLocalState('');
+  useEffect(() => {
+    if (!chamberSlug) return;
+    apiFetch<{ requirePinToVote?: boolean }>(`/chambers/by-slug/${chamberSlug}`)
+      .then(c => setRequirePin(!!c.requirePinToVote))
+      .catch(() => {});
+  }, [chamberSlug]);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isPhone = Math.min(width, height) < 600;
@@ -88,17 +103,52 @@ export default function VotacaoScreen() {
     emptyText: { color: C.textMuted, fontSize: 18, textAlign: 'center', lineHeight: 26 },
   }), [C, isPhone]);
 
-  async function handleVote(choice: 'sim' | 'nao' | 'abstencao') {
+  async function handleVote(choice: 'sim' | 'nao' | 'abstencao', confirmPin?: string) {
     if (voting || myVote) return;
+    if (requirePin && !confirmPin) { setPin(''); setPinError(''); setPinFor(choice); return; }
     setVoting(true);
     try {
-      await vote(choice);
+      await vote(choice, confirmPin);
+      setPinFor(null);
     } catch (err: any) {
-      Alert.alert('Erro', err.message || 'Não foi possível registrar seu voto.');
+      if (err?.code === 'PIN_REQUIRED') { setRequirePin(true); setPin(''); setPinFor(choice); }
+      else if (err?.code === 'PIN_INVALID') { setPin(''); setPinError('PIN incorreto.'); }
+      else if (pinFor) { setPinError(err.message || 'Não foi possível registrar seu voto.'); }
+      else Alert.alert('Erro', err.message || 'Não foi possível registrar seu voto.');
     } finally {
       setVoting(false);
     }
   }
+
+  const choiceLabel = pinFor === 'sim' ? 'SIM' : pinFor === 'nao' ? 'NÃO' : 'ABSTENÇÃO';
+  const pinModal = (
+    <Modal visible={!!pinFor} transparent animationType="fade" onRequestClose={() => setPinFor(null)}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <View style={{ width: '100%', maxWidth: 420, backgroundColor: C.surface, borderRadius: 20, padding: 24, borderWidth: 1, borderColor: C.border }}>
+          <Text style={{ color: C.text, fontSize: 22, fontWeight: '800' }}>Confirmar voto: {choiceLabel}</Text>
+          <Text style={{ color: C.textMuted, fontSize: 16, marginTop: 6, marginBottom: 16 }}>Digite seu PIN de 6 dígitos.</Text>
+          <TextInput
+            value={pin}
+            onChangeText={t => { setPin(t.replace(/\D/g, '').slice(0, 6)); setPinError(''); }}
+            keyboardType="number-pad" secureTextEntry maxLength={6} autoFocus
+            style={{ color: C.text, fontSize: 28, letterSpacing: 12, textAlign: 'center', borderWidth: 1.5, borderColor: C.border, borderRadius: 14, paddingVertical: 14 }}
+          />
+          {pinError ? <Text style={{ color: C.danger, fontSize: 15, marginTop: 10, fontWeight: '600' }}>{pinError}</Text> : null}
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+            <TouchableOpacity onPress={() => setPinFor(null)} style={{ flex: 1, paddingVertical: 16, borderRadius: 14, borderWidth: 1.5, borderColor: C.border, alignItems: 'center' }}>
+              <Text style={{ color: C.text, fontSize: 17, fontWeight: '700' }}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              disabled={pin.length !== 6 || voting}
+              onPress={() => pinFor && handleVote(pinFor, pin)}
+              style={{ flex: 1, paddingVertical: 16, borderRadius: 14, backgroundColor: C.primary, alignItems: 'center', opacity: pin.length !== 6 || voting ? 0.5 : 1 }}>
+              {voting ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontSize: 17, fontWeight: '800' }}>Confirmar</Text>}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   if (loading) {
     return <View style={s.center}><ActivityIndicator color={C.primary} size="large" /></View>;
@@ -196,6 +246,7 @@ export default function VotacaoScreen() {
   if (isLandscape) {
     return (
       <SafeAreaView style={s.root} edges={['top', 'bottom']}>
+        {pinModal}
         <Header router={router} connected={connected} session={session} s={s} C={C} />
         <View style={s.body}>
           <ScrollView style={s.leftScroll} contentContainerStyle={s.leftScrollContent} showsVerticalScrollIndicator={false}>
@@ -212,6 +263,7 @@ export default function VotacaoScreen() {
 
   return (
     <SafeAreaView style={s.root} edges={['top', 'bottom']}>
+      {pinModal}
       <Header router={router} connected={connected} session={session} s={s} C={C} />
       <ScrollView contentContainerStyle={s.portraitScroll} showsVerticalScrollIndicator={false}>
         {leftPanel}

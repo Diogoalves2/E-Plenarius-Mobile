@@ -28,6 +28,28 @@ export default function ControleScreen() {
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  // Roteiro da sessão (fases configuradas no regimento da câmara)
+  const [phases, setPhases] = useState<{ key: string; label: string }[]>([]);
+  const [phase, setPhase] = useState<string | null>(null);
+  useEffect(() => { setPhase(session?.phase ?? null); }, [session?.id, session?.phase]);
+  useEffect(() => {
+    if (!session?.chamberId) return;
+    apiFetch<{ sessionPhases: { key: string; label: string }[] }>(`/chambers/${session.chamberId}/settings`)
+      .then(r => setPhases(r.sessionPhases ?? []))
+      .catch(() => {});
+  }, [session?.chamberId]);
+  const phaseIdx = phases.findIndex(p => p.key === phase);
+
+  async function goPhase(key: string) {
+    if (!session) return;
+    setActionLoading('phase');
+    try {
+      const r = await apiFetch<{ phase: string }>(`/sessions/${session.id}/phase`, { method: 'PATCH', body: JSON.stringify({ phase: key }) });
+      setPhase(r.phase);
+    } catch (err: any) { Alert.alert('Erro', err.message); }
+    finally { setActionLoading(null); }
+  }
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isPhone = Math.min(width, height) < 600;
@@ -130,7 +152,14 @@ export default function ControleScreen() {
     if (!activeItem) return;
     setActionLoading('close');
     try { await apiFetch(`/voting/close/${activeItem.id}`, { method: 'PATCH' }); }
-    catch (err: any) { Alert.alert('Erro', err.message); }
+    catch (err: any) {
+      if (err?.code === 'TIE_NEEDS_PRESIDENT') {
+        Alert.alert('Empate', err.message, [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Ir para votação', onPress: () => router.push('/(presidente)/votacao') },
+        ]);
+      } else Alert.alert('Erro', err.message);
+    }
     finally { setActionLoading(null); }
   }
 
@@ -162,8 +191,26 @@ export default function ControleScreen() {
     );
   }
 
+  const phaseBar = phases.length > 0 ? (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 14 }}>
+      <TouchableOpacity disabled={phaseIdx <= 0 || !!actionLoading} onPress={() => goPhase(phases[phaseIdx - 1].key)}
+                        style={{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: C.border, opacity: phaseIdx <= 0 ? 0.3 : 1 }}>
+        <Text style={{ color: C.text, fontSize: 18, fontWeight: '800' }}>‹</Text>
+      </TouchableOpacity>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: C.textMuted, fontSize: 12, fontWeight: '800', letterSpacing: 1 }}>ROTEIRO · {phaseIdx + 1}/{phases.length}</Text>
+        <Text style={{ color: C.text, fontSize: 18, fontWeight: '800' }} numberOfLines={1}>{phases[phaseIdx]?.label ?? '—'}</Text>
+      </View>
+      <TouchableOpacity disabled={phaseIdx >= phases.length - 1 || !!actionLoading} onPress={() => goPhase(phases[phaseIdx + 1].key)}
+                        style={{ paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, backgroundColor: C.primary, opacity: phaseIdx >= phases.length - 1 ? 0.3 : 1 }}>
+        {actionLoading === 'phase' ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Avançar ›</Text>}
+      </TouchableOpacity>
+    </View>
+  ) : null;
+
   const votingPanel = (
     <View style={[s.leftPanel, !isLandscape && { flex: 0 }]}>
+      {phaseBar}
       {activeItem ? (
         <View style={s.activeCard}>
           <View style={s.statusRow}>
