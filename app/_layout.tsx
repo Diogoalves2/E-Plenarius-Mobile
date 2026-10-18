@@ -28,7 +28,7 @@ function RootGuard() {
     }
 
     if (user && inAuth) {
-      if (user.role === 'presidente') router.replace('/(presidente)');
+      if (user.role === 'presidente' || user.role === 'vice_presidente') router.replace('/(presidente)');
       else router.replace('/(tabs)');
     }
   }, [user, loading, chamberSlug, segments, splashDone]);

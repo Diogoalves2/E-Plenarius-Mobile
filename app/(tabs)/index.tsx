@@ -35,6 +35,7 @@ function sessionTitle(number: number, type: string, ch: Chamber | null): string 
 }
 
 const ROLE_LABEL: Record<string, string> = {
+  vice_presidente: 'Vice-presidente',
   presidente: 'Presidente', vereador: 'Vereador(a)',
   secretaria: 'Secretaria', superadmin: 'Super Admin',
 };

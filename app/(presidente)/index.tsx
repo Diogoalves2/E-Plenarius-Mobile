@@ -15,6 +15,7 @@ import { apiFetch, API_URL } from '@/lib/api';
 const API_BASE = API_URL.replace(/\/api\/?$/, '');
 
 const ROLE_LABEL: Record<string, string> = {
+  vice_presidente: 'Vice-presidente',
   presidente: 'Presidente',
   vereador: 'Vereador(a)',
   secretaria: 'Secretaria',

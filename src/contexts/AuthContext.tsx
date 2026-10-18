@@ -10,7 +10,7 @@ interface User {
   name: string;
   email: string;
   username: string | null;
-  role: 'presidente' | 'vereador' | 'secretaria' | 'superadmin';
+  role: 'presidente' | 'vice_presidente' | 'vereador' | 'secretaria' | 'superadmin';
   chamberId: string | null;
   party: string | null;
   title: string | null;

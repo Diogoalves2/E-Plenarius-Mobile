@@ -13,6 +13,7 @@ import { apiFetch } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
 
 const ROLE_LABEL: Record<string, string> = {
+  vice_presidente: 'Vice-presidente',
   presidente: 'Presidente da Câmara',
   vereador: 'Vereador(a)',
   secretaria: 'Secretaria',

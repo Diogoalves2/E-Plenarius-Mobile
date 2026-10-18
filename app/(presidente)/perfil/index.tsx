@@ -9,6 +9,7 @@ import { Avatar } from '@/components/Avatar';
 import { BackButton } from '@/components/BackButton';
 
 const ROLE_LABEL: Record<string, string> = {
+  vice_presidente: 'Vice-presidente da Câmara',
   presidente: 'Presidente da Câmara',
   vereador: 'Vereador(a)',
   secretaria: 'Secretaria',

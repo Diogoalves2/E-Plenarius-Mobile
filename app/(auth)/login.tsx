@@ -17,7 +17,7 @@ interface Vereador {
   title: string | null;
   avatarUrl: string | null;
   hasPin: boolean;
-  role?: 'presidente' | 'vereador';
+  role?: 'presidente' | 'vice_presidente' | 'vereador';
 }
 
 interface ChamberInfo {
@@ -93,7 +93,7 @@ export default function LoginGridScreen() {
 
   function canLogin(v: Vereador) {
     if (!v.hasPin) return false;
-    if (v.role === 'presidente') return true;
+    if (v.role === 'presidente' || v.role === 'vice_presidente') return true;
     return chamber?.hasActiveSession ?? false;
   }
 
@@ -133,7 +133,7 @@ export default function LoginGridScreen() {
   if (lastUser && !showGrid) {
     const allowed = canLogin(lastUser);
     const avatarUri = lastUser.avatarUrl ? `${API_BASE}${lastUser.avatarUrl}` : null;
-    const showNoSessionWarn = lastUser.role !== 'presidente' && chamber && !chamber.hasActiveSession;
+    const showNoSessionWarn = lastUser.role === 'vereador' && chamber && !chamber.hasActiveSession;
 
     return (
       // flexGrow: ocupa no mínimo a tela inteira — a foto vai até o fim no tablet.
@@ -202,7 +202,7 @@ export default function LoginGridScreen() {
               ]}
             >
               <Text style={[s.primaryBtnText, !allowed && s.primaryBtnTextDisabled]}>
-                {allowed ? 'Entrar' : (lastUser.role === 'presidente' ? 'PIN não cadastrado' : 'Aguardando sessão')}
+                {allowed ? 'Entrar' : (lastUser.role !== 'vereador' ? 'PIN não cadastrado' : 'Aguardando sessão')}
               </Text>
             </Pressable>
 
