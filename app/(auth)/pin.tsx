@@ -75,7 +75,9 @@ export default function PinScreen() {
   const avatarUri = params.avatarUrl ? `${API_BASE}${params.avatarUrl}` : null;
 
   return (
-    <ScrollView style={s.root} contentContainerStyle={isPhone ? { flexGrow: 1 } : undefined}>
+    // flexGrow: o conteúdo ocupa no mínimo a tela inteira — a foto vai até o fim mesmo quando o
+    // formulário é mais baixo que a tela (tablet em pé).
+    <ScrollView style={s.root} contentContainerStyle={{ flexGrow: 1 }}>
       <View style={[s.splitContainer, isPhone && s.splitPhone]}>
         {/* ── Foto do vereador ── */}
         <View style={[s.leftPhotoWrap, isPhone && s.leftPhotoPhone]}>
