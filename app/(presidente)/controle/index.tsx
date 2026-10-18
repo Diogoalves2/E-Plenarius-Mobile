@@ -24,7 +24,7 @@ export default function ControleScreen() {
   const router = useRouter();
   const { colors: C } = useTheme();
   const { session, loading: sessionLoading } = useActiveSession();
-  const { connected, activeItem, counts, votingOpen } = useVotingSocket(session?.id ?? null);
+  const { connected, activeItem, counts, countsHidden, totalVotes, votingOpen } = useVotingSocket(session?.id ?? null);
   const [items, setItems] = useState<AgendaItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -141,7 +141,7 @@ export default function ControleScreen() {
     ]);
   }
 
-  const total = counts.sim + counts.nao + counts.abstencao;
+  const total = totalVotes;
   const isApproved  = activeItem?.status === 'aprovado';
   const isReprovado = activeItem?.status === 'rejeitado';
 
@@ -182,11 +182,15 @@ export default function ControleScreen() {
           <Text style={s.activeAuthor}>
             Autoria: <Text style={{ color: C.text, fontWeight: '700' }}>{activeItem.authorName}</Text>
           </Text>
+          {countsHidden ? (
+            <Text style={[s.scoreSub, { fontWeight: '700' }]}>🔒 Votação secreta — placar revelado ao encerrar</Text>
+          ) : (
           <View style={s.scoreRow}>
             <ScoreChip label="SIM"   count={counts.sim}       color={COLOR_SIM}     s={s} />
             <ScoreChip label="NÃO"   count={counts.nao}       color={COLOR_NAO}     s={s} />
             <ScoreChip label="ABST." count={counts.abstencao} color={COLOR_ABSTAIN} s={s} />
           </View>
+          )}
           <Text style={s.scoreSub}>{total} voto{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}</Text>
           {!votingOpen && (isApproved || isReprovado) && (
             <View style={[s.resultCard, {

@@ -43,3 +43,6 @@ yarn-error.*
 # Local APK builds
 eplenarius.apk
 *.apk
+
+# builds locais
+*.rar

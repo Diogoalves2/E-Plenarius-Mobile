@@ -14,7 +14,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { apiFetch, API_URL } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
 
-const WS_URL = API_URL.replace('/api', '');
+const WS_URL = API_URL.replace(/\/api\/?$/, '');
 const MEDIA_BASE = WS_URL;
 const GUEST_COLOR = '#059669';
 

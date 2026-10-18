@@ -18,13 +18,13 @@ export default function VotacaoScreen() {
   const router = useRouter();
   const { colors: C } = useTheme();
   const { session, loading } = useActiveSession();
-  const { connected, activeItem, counts, myVote, votingOpen, vote } = useVotingSocket(session?.id ?? null);
+  const { connected, activeItem, counts, countsHidden, totalVotes, myVote, votingOpen, vote } = useVotingSocket(session?.id ?? null);
   const [voting, setVoting] = useLocalState(false);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isPhone = Math.min(width, height) < 600;
 
-  const total = counts.sim + counts.nao + counts.abstencao;
+  const total = totalVotes;
 
   const s = useMemo(() => StyleSheet.create({
     root: { flex: 1, backgroundColor: C.bg },
@@ -157,7 +157,7 @@ export default function VotacaoScreen() {
           <Text style={[s.myVoteLabel, {
             color: myVote === 'sim' ? COLOR_SIM : myVote === 'nao' ? COLOR_NAO : COLOR_ABSTAIN,
           }]}>
-            {myVote === 'sim' ? '✅  Você votou SIM' : myVote === 'nao' ? '❌  Você votou NÃO' : '➖  Você se absteve'}
+            {myVote === 'sim' ? '✅  Você votou SIM' : myVote === 'nao' ? '❌  Você votou NÃO' : myVote === 'abstencao' ? '➖  Você se absteve' : '🔒  Seu voto já foi registrado'}
           </Text>
         </View>
       ) : null}
@@ -175,9 +175,16 @@ export default function VotacaoScreen() {
     <View style={s.rightPanel}>
       <Text style={s.scoreHeading}>PLACAR AO VIVO</Text>
       <Text style={s.scoreSub}>{total} voto{total !== 1 ? 's' : ''} registrado{total !== 1 ? 's' : ''}</Text>
+      {countsHidden ? (
+        <View style={[s.scoreRow, { borderColor: C.border }]}>
+          <Text style={{ color: C.text, fontSize: 20, fontWeight: '800' }}>🔒  Votação secreta</Text>
+          <Text style={{ color: C.textMuted, fontSize: 16 }}>O placar é revelado quando o presidente encerrar a votação.</Text>
+        </View>
+      ) : (<>
       <ScoreRow label="SIM"       count={counts.sim}       total={total} color={COLOR_SIM}     emoji="✅" s={s} />
       <ScoreRow label="NÃO"       count={counts.nao}       total={total} color={COLOR_NAO}     emoji="❌" s={s} />
       <ScoreRow label="ABSTENÇÃO" count={counts.abstencao} total={total} color={COLOR_ABSTAIN} emoji="➖" s={s} />
+      </>)}
       {!votingOpen && activeItem.status && activeItem.status !== 'em_votacao' && (
         <View style={[s.resultCard, { backgroundColor: resultColor + '18', borderColor: resultColor }]}>
           <Text style={[s.resultText, { color: resultColor }]}>{resultLabel}</Text>

@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { apiFetch, API_URL } from '@/lib/api';
 import { authEvents } from '@/lib/auth-events';
+import { getDeviceKey, getDeviceName } from '@/lib/device';
 
 interface User {
   id: string;
@@ -135,10 +136,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function loginWithPin(userId: string, pin: string) {
     let res: Response;
     try {
+      const deviceKey = await getDeviceKey();
       res = await fetchWithRetry(`${API_URL}/auth/mobile-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, pin }),
+        body: JSON.stringify({ userId, pin, deviceKey, deviceName: getDeviceName() }),
       });
     } catch (err: any) {
       if (err?.name === 'AbortError') throw new Error('O servidor demorou demais para responder.');

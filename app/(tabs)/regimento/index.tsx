@@ -114,7 +114,7 @@ export default function RegimentoScreen() {
     if (!regimento) return;
     const url = regimento.fileUrl.startsWith('http')
       ? regimento.fileUrl
-      : `${API_URL.replace('/api', '')}${regimento.fileUrl}`;
+      : `${API_URL.replace(/\/api\/?$/, '')}${regimento.fileUrl}`;
     Linking.openURL(url).catch(() => {
       setError('Não foi possível abrir o PDF. Verifique se há um leitor de PDF instalado.');
     });

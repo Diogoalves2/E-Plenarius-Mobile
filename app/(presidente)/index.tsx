@@ -12,7 +12,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Avatar } from '@/components/Avatar';
 import { apiFetch, API_URL } from '@/lib/api';
 
-const API_BASE = API_URL.replace('/api', '');
+const API_BASE = API_URL.replace(/\/api\/?$/, '');
 
 const ROLE_LABEL: Record<string, string> = {
   presidente: 'Presidente',

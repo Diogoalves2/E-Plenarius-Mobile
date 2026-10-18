@@ -106,7 +106,7 @@ export default function PautaScreen() {
   function openPdf(pdfUrl: string) {
     const url = pdfUrl.startsWith('http')
       ? pdfUrl
-      : `${API_URL.replace('/api', '')}${pdfUrl}`;
+      : `${API_URL.replace(/\/api\/?$/, '')}${pdfUrl}`;
     Linking.openURL(url).catch(() =>
       Alert.alert('Erro', 'Não foi possível abrir o PDF. Verifique se há um leitor instalado.'),
     );

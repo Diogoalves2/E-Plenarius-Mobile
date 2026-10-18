@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { API_URL } from '@/lib/api';
 
 const API_BASE = API_URL.replace(/\/api$/, '');
-const PIN_LENGTH = 4;
+const PIN_LENGTH = 6;
 const LAST_USER_KEY = 'last_vereador_id';
 
 /* Paleta light fixa (mesma do login) */
@@ -195,7 +195,7 @@ const s = StyleSheet.create({
 
   instructions: { color: C.textMuted, fontSize: 18, marginBottom: 18, fontWeight: '500' },
 
-  pinDots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 12, height: 28, gap: 20 },
+  pinDots: { flexDirection: 'row', justifyContent: 'center', marginBottom: 12, height: 28, gap: 16 },
   dot: {
     width: 22, height: 22, borderRadius: 11,
     borderWidth: 2, borderColor: C.border,
@@ -203,7 +203,7 @@ const s = StyleSheet.create({
   },
   dotFilled: { backgroundColor: C.primary, borderColor: C.primary },
 
-  feedbackArea: { height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  feedbackArea: { minHeight: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 12, paddingHorizontal: 8 },
   errorText: { color: C.danger, fontSize: 15, textAlign: 'center', fontWeight: '600' },
 
   pad: { alignSelf: 'center' },

@@ -24,7 +24,7 @@ interface Chamber {
   bienioInicio: number | null; bienioFim: number | null; anoBienio: number | null;
 }
 
-const API_BASE = API_URL.replace('/api', '');
+const API_BASE = API_URL.replace(/\/api\/?$/, '');
 
 function sessionTitle(number: number, type: string, ch: Chamber | null): string {
   const tipo = TYPE_LABEL[type] ?? type;

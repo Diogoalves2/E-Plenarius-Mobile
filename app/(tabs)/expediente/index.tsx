@@ -12,8 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { apiFetch, API_URL } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
+import { useIsPhone } from '@/hooks/useIsPhone';
 
-const WS_URL = API_URL.replace('/api', '');
+const WS_URL = API_URL.replace(/\/api\/?$/, '');
 const MEDIA_BASE = WS_URL;
 
 interface InscricaoUser { id: string; name: string; party?: string | null; }
@@ -284,6 +285,7 @@ function ExpedienteSection({
   onInscrever: () => void; onCancelar: () => void; userId: string; flex?: boolean; C: any; st: any;
 }) {
   const isLoading = submitting === tipo || submitting === 'cancel:' + tipo;
+  const isPhone = useIsPhone();
   return (
     <View style={[st.section, { borderColor: color + '30' }, flex && { flex: 1 }]}>
       <View style={st.sectionHeader}>

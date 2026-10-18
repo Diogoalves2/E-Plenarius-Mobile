@@ -1,7 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 import { authEvents } from './auth-events';
 
-export const API_URL = 'https://e-plenarius-backend.onrender.com/api';
+// Sobrescrevível no build: EXPO_PUBLIC_API_URL=https://.../api. Fallback = backend na VPS.
+export const API_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? 'https://eplenarius.2-25-152-184.sslip.io/api';
 
 async function fetchWithTimeout(url: string, options: RequestInit, ms = 10000): Promise<Response> {
   const controller = new AbortController();

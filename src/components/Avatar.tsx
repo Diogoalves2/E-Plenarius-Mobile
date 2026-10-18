@@ -21,7 +21,7 @@ export function Avatar({ name, avatarUrl, size = 44, width, height, borderRadius
   const initials = name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
 
   if (avatarUrl) {
-    const src = avatarUrl.startsWith('http') ? avatarUrl : `${API_URL.replace('/api', '')}${avatarUrl}`;
+    const src = avatarUrl.startsWith('http') ? avatarUrl : `${API_URL.replace(/\/api\/?$/, '')}${avatarUrl}`;
     return (
       <Image source={{ uri: src }} style={[styles.base, { width: w, height: h, borderRadius: br }]} />
     );
