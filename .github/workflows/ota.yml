@@ -1,0 +1,67 @@
+name: App OTA
+
+# Push no master com mudança de código do app → publica atualização OTA assinada.
+# Os tablets baixam ao abrir o app e aplicam na abertura seguinte.
+# Mudança nativa (dependências expo-*/react-native*, app.json, certificado) é BLOQUEADA
+# pelo scripts/ota.mjs: nesse caso gere APK novo com scripts/build-apk.sh.
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'app.json'
+      - 'ota-native-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ota-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+      - name: Montar e assinar atualização
+        env:
+          OTA_PRIVATE_KEY: ${{ secrets.OTA_PRIVATE_KEY }}
+        run: node scripts/ota.mjs build
+
+      - name: Publicar na VPS
+        env:
+          OTA_SSH_KEY: ${{ secrets.OTA_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$OTA_SSH_KEY" > ~/.ssh/ota_key && chmod 600 ~/.ssh/ota_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          . ota-out/release.env
+          ssh -i ~/.ssh/ota_key -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "root@$VPS_HOST" "ota $OTA_RUNTIME $OTA_UPDATE_ID" < ota-out/update.tar.gz
+          rm -f ~/.ssh/ota_key
+
+      - name: Verificar manifesto publicado
+        run: |
+          . ota-out/release.env
+          curl -sf -H "expo-platform: android" -H "expo-runtime-version: $OTA_RUNTIME" \
+            https://eplenarius.2-25-152-184.sslip.io/updates/manifest | grep -q "\"id\":\"$OTA_UPDATE_ID\""
+          echo "Publicada atualização $OTA_UPDATE_ID (runtime $OTA_RUNTIME)"

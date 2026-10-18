@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { API_URL } from '@/lib/api';
+import { AppVersionTag } from '@/components/AppVersionTag';
 
 /* Paleta light fixa (mesma das outras telas de auth) */
 const C = {
@@ -142,6 +143,7 @@ export default function SetupScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <AppVersionTag />
     </KeyboardAvoidingView>
   );
 }

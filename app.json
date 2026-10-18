@@ -2,7 +2,7 @@
   "expo": {
     "name": "E-Plenarius",
     "slug": "e-plenarius",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -30,7 +30,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.eplenarius.mobile"
+      "package": "com.eplenarius.mobile",
+      "versionCode": 2
     },
     "scheme": "eplenarius",
     "plugins": [
@@ -41,6 +42,18 @@
       "router": {},
       "eas": {
         "projectId": "6cf06766-7bca-434e-9416-7cd3b58f0232"
+      }
+    },
+    "runtimeVersion": "1.1.0",
+    "updates": {
+      "enabled": true,
+      "url": "https://eplenarius.2-25-152-184.sslip.io/updates/manifest",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "codeSigningCertificate": "./certs/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "main",
+        "alg": "rsa-v1_5-sha256"
       }
     }
   }

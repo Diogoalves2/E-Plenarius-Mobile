@@ -16,7 +16,7 @@ function RootGuard() {
   useEffect(() => {
     if (!splashDone || loading) return;
     const inAuth = segments[0] === '(auth)';
-    const currentScreen = segments[1];
+    const currentScreen = (segments as string[])[1];
 
     if (!user) {
       if (!chamberSlug && currentScreen !== 'setup') {

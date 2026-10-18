@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useAuth } from '@/contexts/AuthContext';
 import { API_URL } from '@/lib/api';
+import { AppVersionTag } from '@/components/AppVersionTag';
 
 interface Vereador {
   id: string;
@@ -292,6 +293,7 @@ export default function LoginGridScreen() {
           );
         }}
       />
+      <AppVersionTag />
     </View>
   );
 }

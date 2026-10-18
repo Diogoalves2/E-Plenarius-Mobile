@@ -64,7 +64,7 @@ ok "Native android/ gerada"
 
 step "4/5  gradle assembleRelease (pode demorar)"
 cd android
-./gradlew assembleRelease --no-daemon 2>&1 | tail -5
+./gradlew assembleRelease --no-daemon -Dorg.gradle.internal.http.connectionTimeout=60000 -Dorg.gradle.internal.http.socketTimeout=120000 2>&1 | tail -5
 ok "APK compilado"
 
 step "5/5  Copiando APK para o Desktop do Windows"
@@ -73,6 +73,11 @@ APK_BUILT="$LINUX_BUILD/android/app/build/outputs/apk/release/app-release.apk"
 cp "$APK_BUILT" "$APK_OUT"
 SIZE=$(du -h "$APK_OUT" | cut -f1)
 ok "APK copiado ($SIZE)"
+
+# Registra a "impressão digital nativa" deste APK: atualizações OTA só são publicadas
+# se forem compatíveis com ela (scripts/ota.mjs build compara com este arquivo).
+node "$WIN_PROJECT/scripts/ota.mjs" lock
+warn "Faça commit de ota-native-lock.json junto com este build."
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))

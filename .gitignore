@@ -46,3 +46,9 @@ eplenarius.apk
 
 # builds locais
 *.rar
+
+# OTA (gerados por scripts/ota.mjs)
+dist-ota/
+ota-out/
+# certificado PÚBLICO de assinatura OTA (a chave privada nunca entra no repo)
+!certs/certificate.pem
