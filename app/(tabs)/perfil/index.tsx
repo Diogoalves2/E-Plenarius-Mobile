@@ -131,8 +131,8 @@ export default function PerfilScreen() {
       setPwdMsg({ ok: false, text: 'Preencha todos os campos.' });
       return;
     }
-    if (newPwd.length < 6) {
-      setPwdMsg({ ok: false, text: 'Nova senha deve ter pelo menos 6 caracteres.' });
+    if (newPwd.length < 8) {
+      setPwdMsg({ ok: false, text: 'Nova senha deve ter pelo menos 8 caracteres.' });
       return;
     }
     if (newPwd !== confirmPwd) {
