@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Linking, ScrollView,
+  ActivityIndicator, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useIsPhone } from '@/hooks/useIsPhone';
-import { apiFetch, API_URL } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
+import { leitorHref } from '@/lib/leitor';
 import { BackButton } from '@/components/BackButton';
 
 interface Regimento {
@@ -110,14 +111,10 @@ export default function RegimentoScreen() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Abre dentro do próprio app (leitor interno)
   function openPdf() {
     if (!regimento) return;
-    const url = regimento.fileUrl.startsWith('http')
-      ? regimento.fileUrl
-      : `${API_URL.replace(/\/api\/?$/, '')}${regimento.fileUrl}`;
-    Linking.openURL(url).catch(() => {
-      setError('Não foi possível abrir o PDF. Verifique se há um leitor de PDF instalado.');
-    });
+    router.push(leitorHref(regimento.fileUrl, regimento.title || 'Regimento Interno'));
   }
 
   return (

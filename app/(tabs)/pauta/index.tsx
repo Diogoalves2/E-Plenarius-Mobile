@@ -1,15 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, ActivityIndicator,
-  TouchableOpacity, Linking, Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useActiveSession } from '@/hooks/useActiveSession';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useIsPhone } from '@/hooks/useIsPhone';
-import { apiFetch, API_URL } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 import { BackButton } from '@/components/BackButton';
+import { leitorHref } from '@/lib/leitor';
 
 interface AgendaItem {
   id: string;
@@ -103,13 +104,9 @@ export default function PautaScreen() {
       .finally(() => setLoading(false));
   }, [session?.id]);
 
-  function openPdf(pdfUrl: string) {
-    const url = pdfUrl.startsWith('http')
-      ? pdfUrl
-      : `${API_URL.replace(/\/api\/?$/, '')}${pdfUrl}`;
-    Linking.openURL(url).catch(() =>
-      Alert.alert('Erro', 'Não foi possível abrir o PDF. Verifique se há um leitor instalado.'),
-    );
+  // Abre dentro do próprio app (leitor interno), sem mandar o vereador para outro aplicativo
+  function openPdf(pdfUrl: string, titulo: string) {
+    router.push(leitorHref(pdfUrl, titulo));
   }
 
   return (
@@ -166,7 +163,7 @@ export default function PautaScreen() {
                   </View>
                 </View>
                 {item.pdfUrl ? (
-                  <TouchableOpacity style={s.pdfBtn} onPress={() => openPdf(item.pdfUrl!)} activeOpacity={0.85}>
+                  <TouchableOpacity style={s.pdfBtn} onPress={() => openPdf(item.pdfUrl!, `${item.number} — ${item.title}`)} activeOpacity={0.85}>
                     <Text style={s.pdfBtnIcon}>📄</Text>
                     <Text style={s.pdfBtnText}>Abrir documento PDF</Text>
                   </TouchableOpacity>

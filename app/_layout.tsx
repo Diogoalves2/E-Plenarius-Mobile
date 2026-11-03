@@ -42,6 +42,7 @@ function RootGuard() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(presidente)" />
+      <Stack.Screen name="leitor" options={{ animation: 'slide_from_right' }} />
     </Stack>
   );
 }
